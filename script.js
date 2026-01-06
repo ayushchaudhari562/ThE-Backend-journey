@@ -1,2 +1,4 @@
-const H = "MIss HeLLo";
-console.log(H);
+const h = "MIss HeLLo";
+console.log(h);
+const btn = document.getElementById(".hello");
+

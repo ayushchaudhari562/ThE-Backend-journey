@@ -322,3 +322,315 @@ Core idea:
       ✔ Games
       ✔ Streaming apps
       */
+
+
+
+
+      // ===================================================
+// BUILDING HTTP SERVER IN NODE.JS
+// ===================================================
+
+            /*
+            HTTP Server:
+            - Listens for client requests
+            - Sends response back
+            - Used for APIs, backend services
+            */
+
+// ===================================================
+// IMPORT HTTP MODULE
+// ===================================================
+
+const http = require("http");
+
+/*
+http is a core module
+No installation required
+*/
+
+// ===================================================
+// CREATE SERVER
+// ===================================================
+
+const server = http.createServer((req, res) => {
+
+  /*
+  req  -> request from client
+  res  -> response to client
+  */
+
+  res.end("Hello from Node.js server");
+});
+
+
+// ===================================================
+//  START SERVER (LISTEN ON PORT)
+// ===================================================
+
+      server.listen(3000, () => {
+        console.log("Server running on port 3000");
+      });
+
+      /*
+      Server URL:
+      http://localhost:3000
+*/
+// ===================================================
+// REQUEST OBJECT (req)
+// ===================================================
+
+      /*
+      req.url     -> route path
+      req.method  -> HTTP method
+      req.headers -> request info
+      */
+
+// ===================================================
+// RESPONSE OBJECT (res)
+// ===================================================
+
+    /*
+    res.write()      -> send data
+    res.end()        -> end response
+    res.setHeader()  -> set headers
+    res.statusCode   -> HTTP status
+    */
+// =============
+// BASIC ROUTING
+// ===================================================
+
+    const server = http.createServer((req, res) => {
+
+      if (req.url === "/" && req.method === "GET") {
+        res.end("Home Page");
+      } 
+      else if (req.url === "/about") {
+        res.end("About Page");
+      } 
+      else {
+        res.statusCode = 404;
+        res.end("Page Not Found");
+      }
+    });
+
+
+    // ===================================================
+// SEND JSON RESPONSE (API)
+// ===================================================
+
+      const data = {
+        status: "success",
+        message: "API working"
+      };
+
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(data));
+
+// ===================
+// HANDLE POST REQUEST
+// ================================
+
+      if (req.method === "POST") {
+        let body = "";
+
+        req.on("data", (chunk) => {
+          body += chunk;
+        });
+
+        req.on("end", () => {
+          console.log(body);
+          res.end("Data received");
+        });
+      }
+// ===================================================
+// LIMITATION OF HTTP MODULE
+// ===================================================
+
+/*
+- Manual routing
+- No middleware
+- Hard to scale
+
+Solution:
+→ Use Express.js
+*/
+
+
+/*
+Node.js HTTP server is built using the http module
+and works on event-driven, non-blocking architecture.
+*/
+
+// ===================================================
+// HANDLING URL IN NODE.JS
+// ===================================================
+
+/*
+URL handling means:
+- Reading route path
+- Reading query parameters
+- Sending response based on URL
+
+Handled using:
+1. req.url
+2. url module
+*/
+
+
+// ===================================================
+// 1. BASIC URL HANDLING USING req.url
+// ===================================================
+
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+
+  /*
+  req.url contains:
+  - pathname
+  - query string
+
+  Examples:
+  /about
+  /user?id=10
+  */
+
+  if (req.url === "/") {
+    res.end("Home Page");
+  }
+  else if (req.url === "/about") {
+    res.end("About Page");
+  }
+  else {
+    res.statusCode = 404;
+    res.end("Page Not Found");
+  }
+});
+
+server.listen(3000);
+
+
+// ===================================================
+// 2. PROBLEM WITH req.url DIRECT COMPARISON
+// ===================================================
+
+/*
+If URL has query parameters:
+
+URL -> /user?id=10
+
+req.url === "/user"        false
+req.url === "/user?id=10" true
+
+Direct comparison fails when query exists
+*/
+
+
+// ===================================================
+// 3. IMPORT url MODULE
+// ===================================================
+
+const url = require("url");
+
+/*
+url is a core Node.js module
+Used to parse URL properly
+*/
+
+
+// ===================================================
+// 4. PARSE URL
+// ===================================================
+
+const parsedUrl = url.parse(req.url, true);
+
+/*
+true:
+- converts query string into object
+*/
+
+
+// ===================================================
+// 5. ACCESS PATHNAME
+// ===================================================
+
+parsedUrl.pathname;
+
+/*
+Example:
+URL -> /product?id=5
+pathname -> /product
+*/
+
+
+// ===================================================
+// 7. COMPLETE URL HANDLING EXAMPLE
+// ===================================================
+
+const http = require("http");
+const url = require("url");
+
+const server = http.createServer((req, res) => {
+
+  const parsedUrl = url.parse(req.url, true);
+  const path = parsedUrl.pathname;
+  const query = parsedUrl.query;
+
+  if (path === "/") {
+    res.end("Home Page");
+  }
+  else if (path === "/user") {
+    res.end(`User ID: ${query.id}`);
+  }
+  else {
+    res.statusCode = 404;
+    res.end("Route Not Found");
+  }
+});
+
+server.listen(3000);
+
+
+// ===================================================
+// 8. MULTIPLE QUERY PARAMETERS
+// ===================================================
+
+/*
+URL:
+http://localhost:3000/search?q=node&page=2
+
+query.q    -> "node"
+query.page -> "2"
+*/
+
+
+// ===================================================
+// 9. PATHNAME VS QUERY
+// ===================================================
+
+/*
+pathname:
+- route path
+- decides which page/API to serve
+
+query:
+- extra data sent in URL
+- used for filtering, searching, paging
+*/
+
+
+// ===================================================
+// 10. NODE.JS VS EXPRESS URL HANDLING
+// ===================================================
+
+/*
+Node.js:
+- Manual URL parsing
+- More boilerplate
+
+Express:
+- Automatic routing
+- req.params
+- req.query
+*/
+

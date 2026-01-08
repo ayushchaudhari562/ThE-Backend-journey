@@ -208,4 +208,117 @@ readStream.on("data", (chunk) => {
   console.log(chunk);
 });
 
-    
+
+// ======================================
+// HOW NODE.JS WORKS (INTERNAL WORKING)
+// ======================================
+
+/*
+Node.js is a JavaScript runtime that works on:
+- Event-driven
+- Non-blocking I/O
+- Single-threaded architecture
+
+Core idea:
+ Do not wait
+ Handle multiple tasks efficiently
+*/
+
+// ======================================
+// V8 ENGINE
+// ======================================
+
+/*
+- Converts JavaScript → Machine Code
+- Very fast execution
+- Same engine used by Chrome
+*/
+
+    // SINGLE-THREADED MODEL
+
+    /*
+        Node.js uses only ONE main thread.
+
+        But still handles:
+        - Multiple users
+        - Multiple requests
+
+        HOW?
+        → Using Event Loop + async operations
+        */
+
+        // ======================================
+//  NON-BLOCKING I/O
+// ======================================
+
+        /*
+        Blocking:
+        Task waits until completed 
+
+        Non-blocking:
+        Task is sent to background
+        Main thread continues execution 
+        */
+// ======================================
+//  HOW A REQUEST IS HANDLED
+// ======================================
+
+        /*
+        1. Client sends request
+        2. Node.js receives it
+        3. If task is:
+          - Fast → execute immediately
+          - Slow → send to background (thread pool)
+        4. When done → callback added to queue
+        5. Event Loop executes callback
+        */
+// ======================================
+// THREAD POOL
+// ======================================
+
+      /*
+      Used for heavy tasks:
+      - File system
+      - Crypto
+      - Compression
+      - DNS
+
+      Managed by libuv
+      Default size = 4 threads
+      */
+// ======================================
+// EVENT LOOP PHASES (IMPORTANT)
+// ======================================
+
+    /*
+    1. Timers (setTimeout, setInterval)
+    2. I/O callbacks
+    3. Poll phase
+    4. Check (setImmediate)
+    5. Close callbacks
+    */
+
+
+// ======================================
+// WHY NODE.JS IS FAST
+// ======================================
+
+      /*
+      - Non-blocking I/O
+      - Event-driven architecture
+      - V8 Engine
+      - Efficient Event Loop
+      */
+
+
+// ======================================
+// WHEN NODE.JS IS BEST
+// ======================================
+
+      /*
+      ✔ Real-time apps
+      ✔ APIs
+      ✔ Chat apps
+      ✔ Games
+      ✔ Streaming apps
+      */

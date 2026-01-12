@@ -1564,3 +1564,17 @@ const user = {
 /*
 Each object like this is a document.
 */
+
+
+// ===================================================
+// CONNECTING NODE.JS WITH MONGODB
+// ===================================================
+
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb://127.0.0.1:27017/myapp");
+
+/*
+This connects Node.js
+to the MongoDB database.
+*/

@@ -1517,3 +1517,27 @@ Content-Type  -> data format (JSON, HTML, etc)
 Authorization -> login token
 Accept        -> response format
 */
+
+
+// ===================================================
+// HTTP STATUS CODES
+// ===================================================
+
+/*
+Status codes tell what happened
+after a request was sent.
+*/
+
+const statusCodes = {
+  200: "Success",
+  201: "Created",
+  400: "Bad Request",
+  401: "Unauthorized",
+  404: "Not Found",
+  500: "Server Error"
+};
+
+/*
+Frontend reads status code
+to know if API worked or failed.
+*/

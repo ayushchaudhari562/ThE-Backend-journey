@@ -853,3 +853,146 @@ app.delete("/users", (req, res) => {
 // res.status(404).send("Not found")   // set status code
 
 
+// ===================================================
+// VERSIONING IN NODE.JS
+// ===================================================
+
+/*
+Versioning means:
+- Managing different versions of Node.js
+- Managing versions of packages
+- Managing API versions
+
+Used to keep projects stable and compatible
+*/
+// ===================================================
+// 1. NODE.JS VERSION
+// ===================================================
+
+/*
+Node.js itself has versions:
+Example:
+v18.17.0
+v20.10.0
+
+Format:
+MAJOR.MINOR.PATCH
+*/
+// ===================================================
+// 2. MEANING OF VERSION NUMBERS
+// ===================================================
+
+/*
+MAJOR:
+- Breaking changes
+
+MINOR:
+- New features (backward compatible)
+
+PATCH:
+- Bug fixes
+*/
+// ===================================================
+// 3. CHECK NODE VERSION
+// ===================================================
+
+/*
+Command:
+node -v
+*/
+// ===================================================
+// 4. WHY NODE VERSION MATTERS
+// ===================================================
+
+/*
+Different Node versions support:
+- Different JS features
+- Different APIs
+- Different performance
+
+Project built on Node 18
+may break on Node 12
+*/
+// ===================================================
+// 5. MANAGING NODE VERSIONS
+// ===================================================
+
+/*
+Use nvm (Node Version Manager)
+
+Allows:
+- Install multiple Node versions
+- Switch between them
+*/
+// ===================================================
+// 6. PACKAGE VERSIONING (npm)
+// ===================================================
+
+/*
+Each library has version
+Example:
+express@4.18.2
+
+Stored in package.json
+*/
+// ===================================================
+// 7. SEMANTIC VERSIONING
+// ===================================================
+
+/*
+Format:
+MAJOR.MINOR.PATCH
+
+Example:
+4.18.2
+4 -> major
+18 -> minor
+2 -> patch
+*/
+// ===================================================
+// 8. VERSION RANGE SYMBOLS
+// ===================================================
+
+/*
+^1.2.3  -> update minor & patch
+~1.2.3  -> update patch only
+1.2.3   -> fixed version
+*/
+// ===================================================
+// 9. PACKAGE-LOCK.JSON
+// ===================================================
+
+/*
+Locks exact versions
+Prevents different installs
+on different machines
+*/
+// ===================================================
+// 10. API VERSIONING
+// ===================================================
+
+/*
+Used when backend changes
+
+Example:
+GET /api/v1/users
+GET /api/v2/users
+*/
+// ===================================================
+// WHY API VERSIONING IS IMPORTANT
+// ===================================================
+
+/*
+Old clients keep working
+New features added safely
+No breaking changes
+*/
+// ===================================================
+// ONE-LINE SUMMARY
+// ===================================================
+
+/*
+Versioning in Node.js controls
+Node version, package versions,
+and API versions to keep apps stable.
+*/

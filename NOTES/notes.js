@@ -1489,3 +1489,31 @@ app.listen(3000, () => {
 Middleware controls the flow of request
 before it reaches the final route.
 */
+
+
+
+// ===================================================
+// HTTP HEADERS
+// ===================================================
+
+/*
+HTTP headers are extra information sent
+with every request and response.
+
+They tell:
+- What type of data is being sent
+- Who is sending the request
+- How to process the data
+*/
+
+const headers = {
+  "Content-Type": "application/json",
+  "Authorization": "Bearer token",
+  "Accept": "application/json"
+};
+
+/*
+Content-Type  -> data format (JSON, HTML, etc)
+Authorization -> login token
+Accept        -> response format
+*/

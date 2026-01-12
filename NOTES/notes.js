@@ -1107,3 +1107,132 @@ Example:
 A REST API lets frontend and backend
 communicate using HTTP requests and JSON.
 */
+
+
+
+
+
+
+// ===================================================
+// BUILDING REST API USING NODE.JS AND EXPRESS.JS
+// ===================================================
+
+/*
+REST API allows frontend and backend
+to communicate using HTTP and JSON
+Express.js is a Node.js framework
+used to build APIs easily
+*/
+
+// ===================================================
+// 1. INSTALL EXPRESS
+// ===================================================
+
+/*
+Command:
+npm init -y
+npm install express
+*/
+
+// ===================================================
+// 2. IMPORT EXPRESS AND CREATE APP
+// ===================================================
+
+const express = require("express");
+const app = express();
+
+/*
+app is the main server object
+*/
+
+// ===================================================
+// 3. MIDDLEWARE TO READ JSON
+// ===================================================
+
+app.use(express.json());
+
+/*
+Allows API to accept JSON data
+from client
+*/
+
+// ===================================================
+// 4. CREATE SIMPLE GET API
+// ===================================================
+
+app.get("/", (req, res) => {
+  res.send("API is running");
+});
+
+// ===================================================
+// 5. CREATE DATA (POST)
+// ===================================================
+
+let users = [];
+
+app.post("/users", (req, res) => {
+  const user = req.body;
+  users.push(user);
+  res.json({ message: "User added", user });
+});
+
+// ===================================================
+// 6. READ DATA (GET)
+// ===================================================
+
+app.get("/users", (req, res) => {
+  res.json(users);
+});
+
+// ===================================================
+// 7. READ SINGLE USER
+// ===================================================
+
+app.get("/users/:id", (req, res) => {
+  const id = req.params.id;
+  const user = users.find(u => u.id == id);
+  res.json(user);
+});
+
+// ===================================================
+// 8. UPDATE USER (PUT)
+// ===================================================
+
+app.put("/users/:id", (req, res) => {
+  const id = req.params.id;
+  const newData = req.body;
+
+  users = users.map(u =>
+    u.id == id ? newData : u
+  );
+
+  res.json({ message: "User updated" });
+});
+
+// ===================================================
+// 9. DELETE USER
+// ===================================================
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params.id;
+  users = users.filter(u => u.id != id);
+  res.json({ message: "User deleted" });
+});
+
+// ===================================================
+// 10. START SERVER
+// ===================================================
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+
+// ===================================================
+// ONE-LINE SUMMARY
+// ===================================================
+
+/*
+Express makes building REST APIs
+easy by providing routing and middleware
+on top of Node.js
+*/

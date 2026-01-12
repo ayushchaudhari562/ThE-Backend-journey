@@ -424,7 +424,7 @@ const server = http.createServer((req, res) => {
       };
 
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(data));
+      res.end(JSON.stringify(data));\\
 
 // ===================
 // HANDLE POST REQUEST
@@ -512,7 +512,7 @@ server.listen(3000);
 
 // ===================================================
 // 2. PROBLEM WITH req.url DIRECT COMPARISON
-// ===================================================
+// ================================
 
 /*
 If URL has query parameters:

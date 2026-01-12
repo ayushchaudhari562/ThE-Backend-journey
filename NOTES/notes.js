@@ -634,3 +634,102 @@ Express:
 - req.query
 */
 
+
+// =========================
+// NODE.JS — HTTP METHODS 
+// ===================================================
+
+// Import the built-in HTTP module
+const http = require("http");
+
+// Create an HTTP server
+const server = http.createServer((req, res) => {
+
+    // req.method gives the HTTP method of the request
+    // Example values: "GET", "POST", "PUT", "PATCH", "DELETE"
+    const method = req.method;
+
+    // req.url gives the route requested by client
+    // Example: "/", "/users", "/login"
+    const url = req.url;
+
+    // -------------------------------------------------
+    // GET METHOD
+    // Used to READ or FETCH data
+    // Does not change anything on the server
+    // -------------------------------------------------
+
+    if (method === "GET" && url === "/") {
+        // Client wants the home page
+        res.end("Home Page");
+    }
+
+    else if (method === "GET" && url === "/users") {
+        // Client wants all users
+        res.end("List of users");
+    }
+
+    // -------------------------------------------------
+    // POST METHOD
+    // Used to SEND data and CREATE something
+    // Example: signup, login, form submission
+    // -------------------------------------------------
+
+    else if (method === "POST" && url === "/users") {
+        // Client is sending data to create a new user
+        res.end("User created");
+    }
+
+    // -------------------------------------------------
+    // PUT METHOD
+    // Used to REPLACE existing data
+    // Full data is sent to update
+    // -------------------------------------------------
+
+    else if (method === "PUT" && url === "/users") {
+        // Client wants to replace user data
+        res.end("User replaced");
+    }
+
+    // -------------------------------------------------
+    // PATCH METHOD
+    // Used to UPDATE part of the data
+    // Only small changes are sent
+    // -------------------------------------------------
+
+    else if (method === "PATCH" && url === "/users") {
+        // Client wants to update some fields of user
+        res.end("User updated");
+    }
+
+    // -------------------------------------------------
+    // DELETE METHOD
+    // Used to REMOVE data
+    // -------------------------------------------------
+
+    else if (method === "DELETE" && url === "/users") {
+        // Client wants to delete a user
+        res.end("User deleted");
+    }
+
+    // -------------------------------------------------
+    // INVALID ROUTE OR METHOD
+    // -------------------------------------------------
+
+    else {
+        // If no route matches, send 404 error
+        res.statusCode = 404;
+        res.end("Route Not Found");
+    }
+});
+
+// Start the server on port 3000
+server.listen(3000, () => {
+    console.log("Server running on port 3000");
+});
+
+// for revision 
+// req.method  → What action?
+// req.url     → On which resource?
+
+

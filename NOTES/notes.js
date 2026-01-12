@@ -1378,3 +1378,114 @@ Postman shows:
 Postman is a tool used to test
 and debug REST APIs by sending HTTP requests.
 */
+
+
+// ===================================================
+// EXPRESS MIDDLEWARE
+// ===================================================
+
+/*
+Middleware is a function that runs
+between request and response.
+
+Flow:
+Request -> Middleware -> Route -> Response
+*/
+
+// ===================================================
+// WHY MIDDLEWARE IS USED
+// ===================================================
+
+/*
+- To read request body
+- To check authentication
+- To log requests
+- To handle errors
+- To modify request or response
+*/
+
+// ===================================================
+// BASIC MIDDLEWARE STRUCTURE
+// ===================================================
+
+/*
+(req, res, next) => {
+  // code
+  next();
+}
+*/
+
+// ===================================================
+// EXAMPLE: CUSTOM MIDDLEWARE
+// ===================================================
+
+const express = require("express");
+const app = express();
+
+const logger = (req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+};
+
+app.use(logger);
+
+// ===================================================
+// BUILT-IN MIDDLEWARE
+// ===================================================
+
+/*
+express.json()      -> reads JSON body
+express.urlencoded -> reads form data
+*/
+
+app.use(express.json());
+
+// ===================================================
+// ROUTE EXAMPLE
+// ===================================================
+
+app.get("/", (req, res) => {
+  res.send("Home Page");
+});
+
+// ===================================================
+// MIDDLEWARE FOR SPECIFIC ROUTE
+// ===================================================
+
+const auth = (req, res, next) => {
+  const isLoggedIn = true;
+  if (isLoggedIn) {
+    next();
+  } else {
+    res.send("Access Denied");
+  }
+};
+
+app.get("/dashboard", auth, (req, res) => {
+  res.send("Welcome to Dashboard");
+});
+
+// ===================================================
+// ERROR HANDLING MIDDLEWARE
+// ===================================================
+
+app.use((err, req, res, next) => {
+  res.status(500).send("Server Error");
+});
+
+// ===================================================
+// START SERVER
+// ===================================================
+
+app.listen(3000, () => {
+  console.log("Server running");
+});
+
+// ===================================================
+// ONE-LINE SUMMARY
+// ===================================================
+
+/*
+Middleware controls the flow of request
+before it reaches the final route.
+*/

@@ -733,3 +733,123 @@ server.listen(3000, () => {
 // req.url     → On which resource?
 
 
+
+// ===================================================
+// EXPRESS.JS — GETTING STARTED
+// ===================================================
+
+// Express is a web framework built on top of Node.js
+// It makes handling routes, requests, and responses easy
+
+// First install Express using:
+// npm install express
+
+// ---------------------------------------------------
+// Import Express
+// ---------------------------------------------------
+const express = require("express");
+
+// Create an Express application
+const app = express();
+
+// ---------------------------------------------------
+// app is now your server
+// It replaces http.createServer()
+// ---------------------------------------------------
+
+
+// ---------------------------------------------------
+// BASIC ROUTE
+// ---------------------------------------------------
+
+// app.get() handles GET requests
+// "/" is the URL path
+// req = request, res = response
+app.get("/", (req, res) => {
+    // When someone opens http://localhost:3000/
+    // this message is sent
+    res.send("Welcome to Express");
+});
+
+// ---------------------------------------------------
+// START SERVER
+// ---------------------------------------------------
+
+// app.listen() starts the Express server
+// 3000 is the port number
+app.listen(3000, () => {
+    console.log("Express server running on port 3000");
+});
+
+// What Express Does
+
+// Without Express, you write:
+
+// http.createServer((req, res) => { ... })
+
+
+// With Express:
+
+// app.get("/", (req, res) => { ... })
+
+
+// Express handles:
+
+// Routing
+
+// HTTP methods
+
+// Request parsing
+
+// Responses
+
+// Middlewares
+
+
+////////////////////////
+/* Handling in express*/
+////////////////////////
+
+// GET request
+app.get("/users", (req, res) => {
+    res.send("All users");
+});
+
+// POST request
+app.post("/users", (req, res) => {
+    res.send("User created");
+});
+
+// PUT request
+app.put("/users", (req, res) => {
+    res.send("User replaced");
+});
+
+// PATCH request
+app.patch("/users", (req, res) => {
+    res.send("User updated");
+});
+
+// DELETE request
+app.delete("/users", (req, res) => {
+    res.send("User deleted");
+});
+
+
+// Express replaces this
+
+// Node.js way:
+
+// if(req.method === "GET" && req.url === "/users") { }
+
+
+// Express way:
+
+// app.get("/users", handler)
+
+// Sending Response in Express
+// res.send("Hello")        // send text
+// res.json({name:"A"})    // send JSON
+// res.status(404).send("Not found")   // set status code
+
+

@@ -1541,3 +1541,26 @@ const statusCodes = {
 Frontend reads status code
 to know if API worked or failed.
 */
+
+
+// ===================================================
+// MONGODB BASICS
+// ===================================================
+
+/*
+MongoDB is a NoSQL database.
+It stores data in JSON-like format.
+
+Structure:
+Database -> Collection -> Document
+*/
+
+const user = {
+  name: "Ayush",
+  age: 20,
+  email: "test@gmail.com"
+};
+
+/*
+Each object like this is a document.
+*/

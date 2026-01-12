@@ -40,23 +40,23 @@
 // // // const url = require("url");
 
 
-// // // const server = http.createServer((req,res)=> {
-// // //     const parsedUrl = url.parse(req.url,true);
+// const server = http.createServer((req,res)=> {
+//     const parsedUrl = url.parse(req.url,true);
 
-// // //     const path = parseUrl.pathname;
-// // //     const query = parsedUrl.quesry;
-// // //       if (path === "/") {
-// // //     res.end("Home Page");
-// // //   }
-// // //   else if (path === "/user") {
-// // //     res.end(`User ID: ${query.id}`);
-// // //   }
-// // //   else {
-// // //     res.statusCode = 404;
-// // //     res.end("Route Not Found");
-// // //   }
+//     const path = parseUrl.pathname;
+//     const query = parsedUrl.quesry;
+//       if (path === "/") {
+//     res.end("Home Page");
+//   }
+//   else if (path === "/user") {
+//     res.end(`User ID: ${query.id}`);
+//   }
+//   else {
+//     res.statusCode = 404;
+//     res.end("Route Not Found");
+//   }
 
-// // // })
+// })
 
 // // // server.listen(5000, function()
 // // // {
@@ -123,5 +123,6 @@
 //     console.log("Express server running on port 3000");
 // });
 
+///*  */
 
 

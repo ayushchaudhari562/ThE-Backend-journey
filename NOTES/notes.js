@@ -1578,3 +1578,21 @@ mongoose.connect("mongodb://127.0.0.1:27017/myapp");
 This connects Node.js
 to the MongoDB database.
 */
+
+
+// ===================================================
+// MONGOOSE SCHEMA AND MODEL
+// ===================================================
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  age: Number,
+  email: String
+});
+
+const User = mongoose.model("User", userSchema);
+
+/*
+Schema defines data structure.
+Model is used to read and write data.
+*/

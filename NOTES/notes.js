@@ -1596,3 +1596,46 @@ const User = mongoose.model("User", userSchema);
 Schema defines data structure.
 Model is used to read and write data.
 */
+
+
+// ===================================================
+// MVC ARCHITECTURE
+// ===================================================
+
+/*
+MVC means:
+
+Model      -> database logic
+View       -> frontend UI
+Controller -> backend logic
+
+Used to keep code clean and organized.
+*/
+
+// ===================================================
+// URL SHORTENER CONCEPT
+// ===================================================
+
+/*
+Long URL:
+https://example.com/product/12345
+
+Short URL:
+https://short.ly/ab12
+
+Database:
+ab12 -> original long URL
+*/
+
+// ===================================================
+// URL SHORTENER FLOW
+// ===================================================
+
+/*
+1. User sends long URL
+2. Server generates short code
+3. Stores it in MongoDB
+4. Returns short link
+5. When short link is opened
+   server redirects to original URL
+*/

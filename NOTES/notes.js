@@ -1236,3 +1236,145 @@ Express makes building REST APIs
 easy by providing routing and middleware
 on top of Node.js
 */
+
+
+
+// ===================================================
+// POSTMAN FOR REST API
+// ===================================================
+
+/*
+Postman is a tool used to:
+- Test REST APIs
+- Send HTTP requests
+- View server responses
+
+It is used instead of browser
+for testing backend APIs
+*/
+
+// ===================================================
+// WHY POSTMAN IS USED
+// ===================================================
+
+/*
+Browser only supports GET requests easily
+Postman supports:
+GET
+POST
+PUT
+DELETE
+PATCH
+*/
+
+// ===================================================
+// HOW POSTMAN WORKS
+// ===================================================
+
+/*
+Postman acts like a client
+
+Postman -> sends request -> Node.js API
+Node.js -> sends response -> Postman
+*/
+
+// ===================================================
+// STEPS TO TEST REST API USING POSTMAN
+// ===================================================
+
+/*
+1. Open Postman
+2. Select HTTP method (GET, POST, etc)
+3. Enter URL
+   Example:
+   http://localhost:3000/users
+4. Click Send
+5. See response from server
+*/
+
+// ===================================================
+// TESTING GET REQUEST
+// ===================================================
+
+/*
+Method: GET
+URL: http://localhost:3000/users
+
+Returns:
+All users from API
+*/
+
+// ===================================================
+// TESTING POST REQUEST
+// ===================================================
+
+/*
+Method: POST
+URL: http://localhost:3000/users
+
+Body -> raw -> JSON
+Example:
+{
+  "id": 1,
+  "name": "Ayush"
+}
+
+Click Send
+User will be added
+*/
+
+// ===================================================
+// TESTING PUT REQUEST
+// ===================================================
+
+/*
+Method: PUT
+URL: http://localhost:3000/users/1
+
+Body -> raw -> JSON
+Example:
+{
+  "id": 1,
+  "name": "Ayush Updated"
+}
+*/
+
+// ===================================================
+// TESTING DELETE REQUEST
+// ===================================================
+
+/*
+Method: DELETE
+URL: http://localhost:3000/users/1
+*/
+
+// ===================================================
+// RESPONSE IN POSTMAN
+// ===================================================
+
+/*
+Postman shows:
+- Status code
+- JSON response
+- Error messages
+*/
+
+// ===================================================
+// WHY POSTMAN IS IMPORTANT
+// ===================================================
+
+/*
+- Test API without frontend
+- Debug backend
+- Check request and response
+- Learn REST APIs
+*/
+
+// ===================================================
+// ONE-LINE SUMMARY
+// ===================================================
+
+/*
+Postman is a tool used to test
+and debug REST APIs by sending HTTP requests.
+*/

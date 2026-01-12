@@ -996,3 +996,114 @@ Versioning in Node.js controls
 Node version, package versions,
 and API versions to keep apps stable.
 */
+
+
+
+
+
+
+// ===================================================
+// WHAT IS A REST API
+// ===================================================
+
+/*
+REST API:
+REST = Representational State Transfer
+API  = Application Programming Interface
+
+A REST API is a way for two systems
+(frontend and backend) to communicate
+using HTTP requests.
+*/
+ 
+// ===================================================
+// WHY REST API IS USED
+// ===================================================
+
+/*
+- Frontend and backend are separated
+- Mobile, web, and other clients can use same backend
+- Data can be exchanged easily in JSON format
+*/
+ 
+// ===================================================
+// HOW REST API WORKS
+// ===================================================
+
+/*
+Client (Browser / App) sends request
+Server (Node.js) processes it
+Server sends response
+
+Request → Server → Response
+*/
+ 
+// ===================================================
+// HTTP METHODS USED IN REST
+// ===================================================
+
+/*
+GET    -> read data
+POST   -> create data
+PUT    -> update data
+DELETE -> delete data
+*/
+ 
+// ===================================================
+// EXAMPLE OF REST API ENDPOINTS
+// ===================================================
+
+/*
+GET    /users      -> get all users
+GET    /users/5    -> get user with id 5
+POST   /users      -> create new user
+PUT    /users/5    -> update user 5
+DELETE /users/5    -> delete user 5
+*/
+ 
+// ===================================================
+// REST API USES JSON
+// ===================================================
+
+/*
+Data is sent in JSON format
+
+Example:
+{
+  "id": 5,
+  "name": "Ayush",
+  "age": 20
+}
+*/
+ 
+// ===================================================
+// PROPERTIES OF REST API
+// ===================================================
+
+/*
+- Stateless
+- Client and server are independent
+- Uses standard HTTP methods
+- Uses URLs to identify resources
+*/
+ 
+// ===================================================
+// WHERE REST API IS USED
+// ===================================================
+
+/*
+- Web apps
+- Mobile apps
+- Games
+- Dashboards
+- Any frontend-backend communication
+*/
+ 
+// ===================================================
+// ONE-LINE SUMMARY
+// ===================================================
+
+/*
+A REST API lets frontend and backend
+communicate using HTTP requests and JSON.
+*/

@@ -1551,6 +1551,9 @@ to know if API worked or failed.
 MongoDB is a NoSQL database.
 It stores data in JSON-like format.
 
+//Mongos connection;
+
+
 Structure:
 Database -> Collection -> Document
 */
@@ -1585,7 +1588,11 @@ to the MongoDB database.
 // ===================================================
 
 const userSchema = new mongoose.Schema({
-  name: String,
+  name:
+  {
+    type: String,
+    required: true
+  } ,
   age: Number,
   email: String
 });
@@ -1638,4 +1645,846 @@ ab12 -> original long URL
 4. Returns short link
 5. When short link is opened
    server redirects to original URL
+*/
+
+
+
+
+// ===================================================
+// MVC PATTERN (Model-View-Controller)
+// ===================================================
+
+/*
+MVC is an architectural pattern that separates application into 3 parts:
+- Model: Data and business logic
+- View: User interface and presentation
+- Controller: Handles requests and connects Model & View
+*/
+
+// FOLDER STRUCTURE
+/*
+project/
+├── models/          # Database schemas and data logic
+├── views/           # Templates (EJS, Pug, Handlebars)
+├── controllers/     # Request handling logic
+├── routes/          # URL routing
+└── app.js          # Main application file
+*/
+
+// MODEL (models/User.js)
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String
+});
+
+const User = mongoose.model('User', userSchema);
+module.exports = User;
+
+// CONTROLLER (controllers/userController.js)
+const User = require('../models/User');
+
+exports.getAllUsers = async (req, res) => {
+  const users = await User.find();
+  res.render('users', { users });
+};
+
+exports.createUser = async (req, res) => {
+  const newUser = new User(req.body);
+  await newUser.save();
+  res.redirect('/users');
+};
+
+// ROUTES (routes/userRoutes.js)
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/userController');
+
+router.get('/users', userController.getAllUsers);
+router.post('/users', userController.createUser);
+
+module.exports = router;
+
+// MAIN APP (app.js)
+const express = require('express');
+const userRoutes = require('./routes/userRoutes');
+const app = express();
+
+app.set('view engine', 'ejs');
+app.use(express.json());
+app.use(userRoutes);
+
+app.listen(3000);
+
+/*
+MVC BENEFITS:
+- Separation of concerns
+- Code is organized and maintainable
+- Easy to test individual components
+- Multiple developers can work simultaneously
+*/
+
+// ===================================================
+// URL SHORTENER (Using Express & MongoDB)
+// ===================================================
+
+const express = require('express');
+const mongoose = require('mongoose');
+const shortid = require('shortid');
+
+// URL Schema (Model)
+const urlSchema = new mongoose.Schema({
+  originalUrl: { type: String, required: true },
+  shortUrl: { type: String, required: true, unique: true },
+  clicks: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const URL = mongoose.model('URL', urlSchema);
+
+const app = express();
+app.use(express.json());
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/urlshortener');
+
+// Shorten URL endpoint
+app.post('/shorten', async (req, res) => {
+  const { originalUrl } = req.body;
+  
+  // Check if URL already exists
+  let url = await URL.findOne({ originalUrl });
+  
+  if (url) {
+    return res.json(url);
+  }
+  
+  // Create short URL
+  const shortUrl = shortid.generate();
+  
+  url = new URL({
+    originalUrl,
+    shortUrl
+  });
+  
+  await url.save();
+  res.json(url);
+});
+
+// Redirect to original URL
+app.get('/:shortUrl', async (req, res) => {
+  const { shortUrl } = req.params;
+  
+  const url = await URL.findOne({ shortUrl });
+  
+  if (!url) {
+    return res.status(404).json({ error: 'URL not found' });
+  }
+  
+  // Increment click count
+  url.clicks++;
+  await url.save();
+  
+  // Redirect to original URL
+  res.redirect(url.originalUrl);
+});
+
+// Get analytics
+app.get('/analytics/:shortUrl', async (req, res) => {
+  const url = await URL.findOne({ shortUrl: req.params.shortUrl });
+  
+  if (!url) {
+    return res.status(404).json({ error: 'URL not found' });
+  }
+  
+  res.json({
+    originalUrl: url.originalUrl,
+    shortUrl: url.shortUrl,
+    clicks: url.clicks,
+    createdAt: url.createdAt
+  });
+});
+
+app.listen(3000);
+
+/*
+URL SHORTENER KEY CONCEPTS:
+- shortid: Generates unique short IDs
+- MongoDB stores mapping between short and original URLs
+- Track clicks/analytics
+- Redirect using res.redirect()
+*/
+
+// ===================================================
+// SERVER SIDE RENDERING (SSR) with EJS
+// ===================================================
+
+const express = require('express');
+const app = express();
+
+// Set EJS as template engine
+app.set('view engine', 'ejs');
+app.set('views', './views');
+
+// Sample data
+const products = [
+  { id: 1, name: 'Laptop', price: 1000 },
+  { id: 2, name: 'Phone', price: 500 },
+  { id: 3, name: 'Tablet', price: 300 }
+];
+
+// Render EJS template
+app.get('/products', (req, res) => {
+  res.render('products', { 
+    title: 'Product List',
+    products: products,
+    user: { name: 'John' }
+  });
+});
+
+// Dynamic route
+app.get('/product/:id', (req, res) => {
+  const product = products.find(p => p.id == req.params.id);
+  res.render('product-detail', { product });
+});
+
+/*
+EJS TEMPLATE (views/products.ejs):
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+</head>
+<body>
+  <h1>Welcome, <%= user.name %></h1>
+  <ul>
+    <% products.forEach(product => { %>
+      <li>
+        <%= product.name %> - $<%= product.price %>
+      </li>
+    <% }); %>
+  </ul>
+</body>
+</html>
+*/
+
+/*
+EJS SYNTAX:
+<%= value %>        - Output escaped value
+<%- value %>        - Output unescaped HTML
+<% code %>          - Execute JavaScript code
+<%- include('partial') %> - Include partial template
+
+SSR BENEFITS:
+- Better SEO (search engines can crawl content)
+- Faster initial page load
+- Works without JavaScript
+- Good for content-heavy sites
+*/
+
+// ===================================================
+// AUTHENTICATION FROM SCRATCH
+// ===================================================
+
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+// User Schema
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true }
+});
+
+const User = mongoose.model('User', userSchema);
+
+const app = express();
+app.use(express.json());
+
+const SECRET_KEY = 'your-secret-key-here';
+
+// SIGNUP (Register)
+app.post('/signup', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+    
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+    // Create user
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword
+    });
+    
+    await user.save();
+    
+    res.status(201).json({ message: 'User created successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// LOGIN
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    // Compare password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      SECRET_KEY,
+      { expiresIn: '24h' }
+    );
+    
+    res.json({ 
+      message: 'Login successful',
+      token,
+      user: { username: user.username, email: user.email }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Middleware to verify JWT token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied' });
+  }
+  
+  jwt.verify(token, SECRET_KEY, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+// Protected route
+app.get('/profile', authenticateToken, async (req, res) => {
+  const user = await User.findById(req.user.userId).select('-password');
+  res.json(user);
+});
+
+/*
+AUTHENTICATION FLOW:
+1. SIGNUP: Hash password with bcrypt → Save to DB
+2. LOGIN: Compare password → Generate JWT token
+3. PROTECTED ROUTES: Verify JWT token → Grant access
+
+SECURITY BEST PRACTICES:
+- Never store plain text passwords
+- Use bcrypt with salt rounds (10-12)
+- Store JWT secret in environment variables
+- Use HTTPS in production
+- Implement token expiration
+- Consider refresh tokens for better security
+*/
+
+// ===================================================
+// JWT AUTHENTICATION (JSON Web Token)
+// ===================================================
+
+const jwt = require('jsonwebtoken');
+
+// Creating a JWT
+const payload = {
+  userId: '12345',
+  email: 'user@example.com',
+  role: 'admin'
+};
+
+const SECRET = 'my-super-secret-key';
+
+// Sign token (create)
+const token = jwt.sign(payload, SECRET, {
+  expiresIn: '1h'  // Token expires in 1 hour
+});
+
+console.log(token);
+// Output: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+// Verify token
+try {
+  const decoded = jwt.verify(token, SECRET);
+  console.log(decoded);
+  // Output: { userId: '12345', email: 'user@example.com', role: 'admin', iat: ..., exp: ... }
+} catch (error) {
+  console.log('Invalid token');
+}
+
+// JWT Middleware Example
+const verifyToken = (req, res, next) => {
+  // Get token from header
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, SECRET);
+    req.user = decoded;  // Attach user info to request
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
+
+// Using the middleware
+app.get('/dashboard', verifyToken, (req, res) => {
+  res.json({ 
+    message: 'Welcome to dashboard',
+    user: req.user 
+  });
+});
+
+/*
+JWT STRUCTURE (3 parts separated by dots):
+1. HEADER: Algorithm and token type
+2. PAYLOAD: Data (claims)
+3. SIGNATURE: Encrypted with secret key
+
+JWT vs SESSIONS:
+JWT:
+- Stateless (no server-side storage)
+- Scalable for microservices
+- Can't be invalidated before expiry
+- Larger size
+
+Sessions:
+- Stateful (stored on server)
+- Can be invalidated anytime
+- Smaller cookie size
+- Requires session store
+*/
+
+// ===================================================
+// COOKIES IN NODE.JS
+// ===================================================
+
+const express = require('express');
+const cookieParser = require('cookie-parser');
+
+const app = express();
+app.use(cookieParser());
+
+// Set a cookie
+app.get('/set-cookie', (req, res) => {
+  // Basic cookie
+  res.cookie('username', 'JohnDoe');
+  
+  // Cookie with options
+  res.cookie('sessionId', '12345', {
+    maxAge: 900000,     // Expires in 15 minutes (in milliseconds)
+    httpOnly: true,     // Not accessible via JavaScript (XSS protection)
+    secure: true,       // Only sent over HTTPS
+    sameSite: 'strict'  // CSRF protection
+  });
+  
+  res.send('Cookies set!');
+});
+
+// Read cookies
+app.get('/get-cookie', (req, res) => {
+  const username = req.cookies.username;
+  const sessionId = req.cookies.sessionId;
+  
+  res.json({ username, sessionId });
+});
+
+// Delete cookie
+app.get('/delete-cookie', (req, res) => {
+  res.clearCookie('username');
+  res.send('Cookie deleted!');
+});
+
+// Signed cookies (more secure)
+app.use(cookieParser('my-secret-key'));
+
+app.get('/set-signed-cookie', (req, res) => {
+  res.cookie('userId', '789', { signed: true });
+  res.send('Signed cookie set!');
+});
+
+app.get('/get-signed-cookie', (req, res) => {
+  const userId = req.signedCookies.userId;
+  res.json({ userId });
+});
+
+/*
+COOKIE OPTIONS:
+- maxAge: Expiry time in milliseconds
+- expires: Expiry date
+- httpOnly: Prevents JavaScript access (security)
+- secure: Only HTTPS (production)
+- sameSite: 'strict', 'lax', or 'none' (CSRF protection)
+- domain: Which domain can access
+- path: Which path can access
+
+COOKIES vs LOCAL STORAGE:
+Cookies:
+- Sent with every HTTP request
+- 4KB limit per cookie
+- Can set expiry
+- More secure (httpOnly, secure flags)
+
+Local Storage:
+- Not sent with requests
+- 5-10MB limit
+- Persistent until cleared
+- Accessible via JavaScript
+*/
+
+// ===================================================
+// AUTHORIZATION (Role-Based Access Control)
+// ===================================================
+
+// User model with roles
+const userSchema = new mongoose.Schema({
+  username: String,
+  email: String,
+  password: String,
+  role: { 
+    type: String, 
+    enum: ['user', 'admin', 'moderator'],
+    default: 'user' 
+  }
+});
+
+// Authorization middleware
+const authorize = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ 
+        error: 'You do not have permission to access this resource' 
+      });
+    }
+    
+    next();
+  };
+};
+
+// Protected routes with different access levels
+app.get('/users', 
+  authenticateToken,              // First authenticate
+  authorize('admin', 'moderator'), // Then authorize
+  async (req, res) => {
+    const users = await User.find();
+    res.json(users);
+  }
+);
+
+app.delete('/users/:id', 
+  authenticateToken,
+  authorize('admin'),  // Only admins can delete
+  async (req, res) => {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'User deleted' });
+  }
+);
+
+app.get('/profile', 
+  authenticateToken,
+  authorize('user', 'admin', 'moderator'),  // All authenticated users
+  (req, res) => {
+    res.json({ message: 'Your profile' });
+  }
+);
+
+/*
+AUTHENTICATION vs AUTHORIZATION:
+
+AUTHENTICATION: 
+- "Who are you?" 
+- Verifying identity (login)
+- JWT, sessions, OAuth
+
+AUTHORIZATION:
+- "What can you do?"
+- Verifying permissions (access control)
+- Role-based, permission-based
+
+COMMON ROLES:
+- User: Basic access
+- Admin: Full access
+- Moderator: Moderate content
+- Guest: Limited/read-only access
+*/
+
+// ===================================================
+// DISCORD BOT IN NODE.JS
+// ===================================================
+
+const { Client, GatewayIntentBits } = require('discord.js');
+
+// Create client with intents
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
+
+// Bot ready event
+client.once('ready', () => {
+  console.log(`Logged in as ${client.user.tag}`);
+});
+
+// Message event
+client.on('messageCreate', async (message) => {
+  // Ignore bot messages
+  if (message.author.bot) return;
+  
+  // Ping command
+  if (message.content === '!ping') {
+    message.reply('Pong!');
+  }
+  
+  // Server info command
+  if (message.content === '!serverinfo') {
+    message.channel.send(`Server name: ${message.guild.name}
+Total members: ${message.guild.memberCount}`);
+  }
+  
+  // User info command
+  if (message.content === '!userinfo') {
+    message.reply(`Your username: ${message.author.username}
+Your ID: ${message.author.id}
+Account created: ${message.author.createdAt}`);
+  }
+  
+  // Kick member (admin only)
+  if (message.content.startsWith('!kick')) {
+    if (!message.member.permissions.has('KickMembers')) {
+      return message.reply('You don\'t have permission!');
+    }
+    
+    const member = message.mentions.members.first();
+    if (member) {
+      await member.kick();
+      message.channel.send(`${member.user.tag} has been kicked!`);
+    }
+  }
+  
+  // Embed message
+  if (message.content === '!embed') {
+    const embed = {
+      color: 0x0099ff,
+      title: 'Sample Embed',
+      description: 'This is an embedded message',
+      fields: [
+        { name: 'Field 1', value: 'Value 1', inline: true },
+        { name: 'Field 2', value: 'Value 2', inline: true }
+      ],
+      timestamp: new Date()
+    };
+    
+    message.channel.send({ embeds: [embed] });
+  }
+});
+
+// Login with bot token
+client.login('YOUR_BOT_TOKEN_HERE');
+
+/*
+DISCORD BOT SETUP:
+1. Go to Discord Developer Portal
+2. Create new application
+3. Go to Bot section → Add Bot
+4. Copy token
+5. Enable Message Content Intent
+6. Invite bot using OAuth2 URL
+
+COMMON BOT FEATURES:
+- Message commands
+- Slash commands
+- Moderation (kick, ban, mute)
+- Music player
+- Games and fun commands
+- Auto-moderation
+- Welcome messages
+- Logging
+
+INTENTS (Permissions):
+- Guilds: Server info
+- GuildMessages: Read messages
+- MessageContent: Access message content
+- GuildMembers: Member info
+*/
+
+// ===================================================
+// COMPLETE AUTHENTICATION EXAMPLE
+// ===================================================
+
+const express = require('express');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+
+const app = express();
+app.use(express.json());
+app.use(cookieParser());
+
+// Database connection
+mongoose.connect('mongodb://localhost:27017/authapp');
+
+// User Schema
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' }
+});
+
+const User = mongoose.model('User', userSchema);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'secret-key';
+
+// Register
+app.post('/register', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const user = new User({
+      username,
+      email,
+      password: hashedPassword
+    });
+    
+    await user.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Login
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    
+    res.json({ 
+      message: 'Login successful',
+      user: { username: user.username, email: user.email }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Logout
+app.post('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out successfully' });
+});
+
+// Auth middleware
+const authenticate = (req, res, next) => {
+  const token = req.cookies.token;
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(403).json({ error: 'Invalid token' });
+  }
+};
+
+// Protected route
+app.get('/dashboard', authenticate, (req, res) => {
+  res.json({ message: 'Welcome to dashboard', userId: req.user.userId });
+});
+
+// Admin-only route
+app.get('/admin', authenticate, (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  res.json({ message: 'Admin panel' });
+});
+
+app.listen(3000, () => console.log('Server running on port 3000'));
+
+/*
+FULL STACK AUTHENTICATION CHECKLIST:
+✓ Password hashing (bcrypt)
+✓ JWT token generation
+✓ Token stored in httpOnly cookie
+✓ Authentication middleware
+✓ Role-based authorization
+✓ Secure cookie options
+✓ Token expiration
+✓ Logout functionality
+✓ Error handling
+
+PRODUCTION CONSIDERATIONS:
+- Use environment variables for secrets
+- Implement rate limiting
+- Add email verification
+- Use refresh tokens
+- Implement password reset
+- Add 2FA (two-factor authentication)
+- Log authentication attempts
+- Use HTTPS only
 */

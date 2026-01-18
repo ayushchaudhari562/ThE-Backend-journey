@@ -36,8 +36,8 @@
 // // //     console.log("Server is running");
 // // // });
 
-// // // const http = require("http");
-// // // const url = require("url");
+// const http = require("http");
+// const url = require("url");
 
 
 // const server = http.createServer((req,res)=> {
@@ -126,7 +126,54 @@
 ///*  */
 
 
-const express = require("express");
-const app = express();
+// const express = require("express");
+// const app = express();
 
-app.listen(PORT,()=> console.log("server start"))
+// app.listen(PORT,()=> console.log("server start"))
+
+
+
+
+
+
+// mongoose.connect("localhost:27017");
+// const mongoose = require("mongoose");
+// const userSchema = new mongoose({
+//     firstName: {
+//         type: String,
+//         required: true,
+//     },
+
+// })
+
+// const express = require("express");
+// const mongoose = require("mongoose");
+
+
+// const app = express();
+
+
+
+// mongoose.connect('mongodb://localhost:27017/lemon');
+
+
+// const UserSchema = mongoose.Schema({
+//     name: String,
+//     age: Number
+// });
+
+// const UserModel = mongoose.model("users",UserSchema);
+// app.get("/user",(req,res)=>{
+//     res.json(UserModel.find({}).then(function(users){
+//         res.json(users);
+//     })).catch(function(err)
+// {
+//     console.log(err);
+// })
+// });
+// app.listen(5000, ()=> {
+//     console.log("Server is Running");
+// });
+const path = require("path");
+app.set("view engine", "ejs");
+app.set('views',path.resolve("./views"));

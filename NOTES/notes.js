@@ -424,7 +424,8 @@ const server = http.createServer((req, res) => {
       };
 
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(data));\\
+      res.end(JSON.stringify(data));
+      
 
 // ===================
 // HANDLE POST REQUEST
@@ -750,7 +751,7 @@ server.listen(3000, () => {
 const express = require("express");
 
 // Create an Express application
-const app = express();
+const app=express();
 
 // ---------------------------------------------------
 // app is now your server
@@ -1016,19 +1017,18 @@ A REST API is a way for two systems
 using HTTP requests.
 */
  
-// ===================================================
+// ====================
 // WHY REST API IS USED
-// ===================================================
-
+// ====================
 /*
 - Frontend and backend are separated
 - Mobile, web, and other clients can use same backend
 - Data can be exchanged easily in JSON format
 */
  
-// ===================================================
+// ==================
 // HOW REST API WORKS
-// ===================================================
+// =============
 
 /*
 Client (Browser / App) sends request
@@ -1086,7 +1086,7 @@ Example:
 - Uses standard HTTP methods
 - Uses URLs to identify resources
 */
- 
+
 // ===================================================
 // WHERE REST API IS USED
 // ===================================================
@@ -2490,3 +2490,44 @@ PRODUCTION CONSIDERATIONS:
 */
 
 
+///////////////// 31 jan 2026?????//////////
+
+
+// multer:primarily used for uploading files
+import express from "express";
+import multer from "multer";
+
+const app = express();
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads");
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + "-" + Date.now() + ".jpg");
+    }
+});
+
+const upload = multer({ storage });
+
+app.get("/", (req, res) => {
+    res.send(`
+    <form action="/uploads" method="POST" enctype="multipart/form-data">
+      <input type="file" name="myFile" />
+      <button type="submit">Upload file</button>
+    </form>
+  `);
+});
+
+app.post("/uploads", upload.single("myFile"), (req, res) => {
+    res.send({
+        message: "file uploaded",
+        info: req.file
+    });
+});
+
+app.listen(9000, () => {
+    console.log("Server running on 9000");
+});
+///project 
+//discord bot ,url shorten,blogging website;

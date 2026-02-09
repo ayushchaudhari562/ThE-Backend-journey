@@ -2532,4 +2532,2946 @@ app.listen(9000, () => {
 ///project 
 //discord bot ,url shorten,blogging website;
 
-``
+
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   TOPIC 1: NODEJS BLOGGING APP – PROJECT SETUP                           ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+/*
+========================================
+1.1 — WHAT ARE WE BUILDING?
+========================================
+
+A full-stack, server-side rendered blogging platform where:
+  - Users can register and login
+  - Authenticated users can create, edit, delete blog posts
+  - Anyone can read published blogs
+  - Blog posts support tags, drafts, and rich text
+
+TECH STACK:
+┌──────────────┬──────────────────────────────────────────────┐
+│ Technology   │ Role                                         │
+├──────────────┼──────────────────────────────────────────────┤
+│ Node.js      │ Server-side JavaScript runtime               │
+│ Express.js   │ Web application framework                    │
+│ MongoDB      │ NoSQL database for storing data              │
+│ Mongoose     │ ODM (Object Data Modeling) for MongoDB       │
+│ EJS          │ Templating engine for server-side rendering  │
+│ Passport.js  │ Authentication middleware                    │
+│ bcryptjs     │ Password hashing library                     │
+│ dotenv       │ Environment variable management              │
+│ express-     │ Session management for login persistence     │
+│   session    │                                              │
+└──────────────┴──────────────────────────────────────────────┘
+
+
+========================================
+1.2 — PROJECT STRUCTURE (MVC PATTERN)
+========================================
+
+blog-app/
+│
+├── 📂 config/                    ← CONFIGURATION LAYER
+│   ├── db.js                     // MongoDB connection logic
+│   └── passport.js               // Passport authentication strategies
+│
+├── 📂 controllers/               ← BUSINESS LOGIC LAYER
+│   ├── authController.js         // Register, Login, Logout logic
+│   └── blogController.js         // CRUD operations for blogs
+│
+├── 📂 middleware/                ← CUSTOM MIDDLEWARE
+│   ├── authMiddleware.js         // Route protection (ensureAuth)
+│   └── errorMiddleware.js        // Global error handler
+│
+├── 📂 models/                    ← DATA LAYER (Mongoose Schemas)
+│   ├── User.js                   // User schema + password hashing
+│   └── Blog.js                   // Blog schema + validations
+│
+├── 📂 routes/                    ← ROUTING LAYER
+│   ├── authRoutes.js             // /auth/* routes
+│   └── blogRoutes.js             // /blogs/* routes
+│
+├── 📂 views/                     ← PRESENTATION LAYER (EJS Templates)
+│   ├── 📂 partials/
+│   │   ├── header.ejs            // Common header + navbar
+│   │   ├── footer.ejs            // Common footer + scripts
+│   │   └── alerts.ejs            // Flash message display
+│   ├── 📂 auth/
+│   │   ├── login.ejs             // Login form page
+│   │   └── register.ejs          // Registration form page
+│   ├── 📂 blogs/
+│   │   ├── index.ejs             // All blogs listing page
+│   │   ├── show.ejs              // Single blog detail page
+│   │   ├── new.ejs               // Create blog form
+│   │   └── edit.ejs              // Edit blog form
+│   ├── home.ejs                  // Landing page
+│   └── 404.ejs                   // Not found page
+│
+├── 📂 public/                    ← STATIC ASSETS
+│   ├── 📂 css/
+│   │   └── style.css
+│   ├── 📂 js/
+│   │   └── main.js
+│   └── 📂 images/
+│
+├── 📄 app.js                     ← APPLICATION ENTRY POINT
+├── 📄 package.json               ← Dependencies & scripts
+├── 📄 .env                       ← Environment variables (SECRET)
+├── 📄 .gitignore                 ← Files to ignore in git
+└── 📄 README.md                  ← Project documentation
+
+
+========================================
+1.3 — WHY MVC ARCHITECTURE?
+========================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│                     MVC ARCHITECTURE                             │
+│                                                                  │
+│    ┌──────────┐     ┌──────────────┐     ┌──────────┐           │
+│    │          │     │              │     │          │           │
+│    │  MODEL   │◄────│  CONTROLLER  │────►│   VIEW   │           │
+│    │  (Data)  │     │   (Logic)    │     │   (UI)   │           │
+│    └──────────┘     └──────────────┘     └──────────┘           │
+│         │                  ▲                  │                  │
+│         ▼                  │                  ▼                  │
+│    ┌─────────┐        ┌────┴────┐        ┌────────┐            │
+│    │ MongoDB │        │ Express │        │  HTML   │            │
+│    │ Schemas │        │ Routes  │        │  (EJS)  │            │
+│    │ Queries │        │Handlers │        │ Output  │            │
+│    └─────────┘        └─────────┘        └────────┘            │
+└─────────────────────────────────────────────────────────────────┘
+
+BENEFITS:
+┌────────────────────────┬──────────────────────────────────────────┐
+│ Benefit                │ Explanation                              │
+├────────────────────────┼──────────────────────────────────────────┤
+│ Separation of Concerns │ Each layer has ONE job only              │
+│ Easy Debugging         │ Bug in UI? → View. Bug in data? → Model │
+│ Scalability            │ Add features without restructuring      │
+│ Team Collaboration     │ Frontend/Backend devs work in parallel  │
+│ Reusability            │ Models reused across controllers        │
+│ Testability            │ Unit test each layer independently      │
+│ Industry Standard      │ Same pattern in Django, Rails, Laravel  │
+└────────────────────────┴──────────────────────────────────────────┘
+
+
+========================================
+1.4 — INITIAL SETUP COMMANDS
+========================================
+*/
+
+// STEP 1: Create project directory
+// mkdir blog-app && cd blog-app
+
+// STEP 2: Initialize package.json
+// npm init -y
+
+// STEP 3: Install production dependencies
+// npm install express mongoose ejs dotenv bcryptjs express-session
+//          passport passport-local connect-flash method-override
+
+// STEP 4: Install dev dependencies
+// npm install nodemon --save-dev
+
+/*
+┌────────────────────┬──────────────────────────────────────────────┐
+│ Package            │ Purpose                                      │
+├────────────────────┼──────────────────────────────────────────────┤
+│ express            │ Web server framework                         │
+│ mongoose           │ MongoDB object modeling (ODM)                │
+│ ejs                │ Embedded JavaScript templates                │
+│ dotenv             │ Load .env variables into process.env         │
+│ bcryptjs           │ Hash passwords (no native dependencies)      │
+│ express-session    │ Server-side session storage                  │
+│ passport           │ Authentication framework (500+ strategies)   │
+│ passport-local     │ Username/password authentication strategy    │
+│ connect-flash      │ Flash messages (success/error notifications) │
+│ method-override    │ Support PUT/DELETE in HTML forms             │
+│ nodemon (dev)      │ Auto-restart server on file changes          │
+└────────────────────┴──────────────────────────────────────────────┘
+*/
+
+// STEP 5: Configure package.json scripts
+/*
+{
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  }
+}
+*/
+
+/*
+========================================
+1.5 — ENVIRONMENT VARIABLES (.env)
+========================================
+*/
+
+// .env file (NEVER commit this to git!)
+/*
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/blogapp
+SESSION_SECRET=your_super_secret_random_string_here_abc123xyz
+NODE_ENV=development
+*/
+
+// .gitignore file
+/*
+node_modules/
+.env
+.DS_Store
+*/
+
+/*
+========================================
+1.6 — DATABASE CONNECTION (config/db.js)
+========================================
+*/
+
+// config/db.js
+const mongoose_setup = `
+const mongoose = require('mongoose');
+
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
+
+        console.log('✅ MongoDB Connected: ' + conn.connection.host);
+
+        // Handle connection events
+        mongoose.connection.on('error', (err) => {
+            console.error('❌ MongoDB Error:', err);
+        });
+
+        mongoose.connection.on('disconnected', () => {
+            console.warn('⚠️  MongoDB Disconnected');
+        });
+
+    } catch (error) {
+        console.error('❌ MongoDB Connection Failed:', error.message);
+        process.exit(1);  // Exit with failure
+    }
+};
+
+module.exports = connectDB;
+`;
+
+/*
+CONNECTION FLOW:
+================
+  app.js starts
+      │
+      ▼
+  connectDB() called
+      │
+      ▼
+  mongoose.connect(URI)
+      │
+      ├── ✅ SUCCESS → Log host → App continues → Listens on PORT
+      │
+      └── ❌ FAILURE → Log error → process.exit(1) → App terminates
+*/
+
+/*
+========================================
+1.7 — MAIN APPLICATION FILE (app.js)
+========================================
+*/
+
+const app_js_code = `
+// ==========================================
+// IMPORTS
+// ==========================================
+const express        = require('express');
+const mongoose       = require('mongoose');
+const session        = require('express-session');
+const passport       = require('passport');
+const flash          = require('connect-flash');
+const methodOverride = require('method-override');
+const path           = require('path');
+const dotenv         = require('dotenv');
+
+// Load environment variables FIRST
+dotenv.config();
+
+// Import configurations
+const connectDB = require('./config/db');
+require('./config/passport')(passport);
+
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const blogRoutes = require('./routes/blogRoutes');
+
+// ==========================================
+// INITIALIZE APP
+// ==========================================
+const app  = express();
+const PORT = process.env.PORT || 3000;
+
+// ==========================================
+// CONNECT TO DATABASE
+// ==========================================
+connectDB();
+
+// ==========================================
+// MIDDLEWARE PIPELINE
+// ==========================================
+/*
+  REQUEST FLOW THROUGH MIDDLEWARE:
+
+  Client Request
+      │
+      ▼
+  express.json()          → Parse JSON bodies
+      │
+      ▼
+  express.urlencoded()    → Parse form data
+      │
+      ▼
+  methodOverride()        → Support PUT/DELETE from forms
+      │
+      ▼
+  express.static()        → Serve CSS, JS, images
+      │
+      ▼
+  session()               → Create/read session
+      │
+      ▼
+  passport.initialize()   → Initialize passport
+      │
+      ▼
+  passport.session()      → Deserialize user from session
+      │
+      ▼
+  flash()                 → Flash messages
+      │
+      ▼
+  Global Variables        → Set res.locals
+      │
+      ▼
+  ROUTE HANDLER           → Controller logic
+      │
+      ▼
+  Response sent to client
+*/
+
+// Parse request bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Method override for PUT/DELETE in HTML forms
+// HTML forms only support GET and POST
+// This allows: <form method="POST" action="/blogs/123?_method=DELETE">
+app.use(methodOverride('_method'));
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,              // Don't save session if unchanged
+    saveUninitialized: false,   // Don't create session until something stored
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24,  // 24 hours
+        httpOnly: true,                 // Prevents client-side JS access
+        secure: process.env.NODE_ENV === 'production'  // HTTPS only in prod
+    }
+}));
+
+// Passport middleware (MUST be after session)
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Flash messages
+app.use(flash());
+
+// Global variables (accessible in ALL EJS templates)
+app.use((req, res, next) => {
+    res.locals.currentUser   = req.user || null;
+    res.locals.success_msg   = req.flash('success');
+    res.locals.error_msg     = req.flash('error');
+    res.locals.passport_error = req.flash('error');  // Passport errors
+    next();
+});
+
+// ==========================================
+// VIEW ENGINE
+// ==========================================
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// ==========================================
+// ROUTES
+// ==========================================
+app.get('/', (req, res) => {
+    res.render('home', { title: 'Welcome to BlogApp' });
+});
+
+app.use('/auth', authRoutes);
+app.use('/blogs', blogRoutes);
+
+// 404 Handler (after all routes)
+app.use((req, res) => {
+    res.status(404).render('404', { title: 'Page Not Found' });
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).render('500', {
+        title: 'Server Error',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
+});
+
+// ==========================================
+// START SERVER
+// ==========================================
+app.listen(PORT, () => {
+    console.log('Server running on http://localhost:' + PORT);
+    console.log('Environment:', process.env.NODE_ENV);
+});
+
+module.exports = app;
+`;
+
+/*
+========================================
+1.8 — UNDERSTANDING MIDDLEWARE ORDER
+========================================
+
+⚠️ CRITICAL: Middleware ORDER matters!
+
+WRONG ORDER:
+  passport.session() → session()     ← CRASH! Session doesn't exist yet
+
+CORRECT ORDER:
+  session() → passport.initialize() → passport.session()
+
+RULE: Each middleware can depend on the ones ABOVE it.
+
+┌────────────────────────────────────────────────────────────┐
+│  MIDDLEWARE DEPENDENCY CHAIN                                │
+│                                                             │
+│  express.json()       → No dependencies                    │
+│  express.urlencoded() → No dependencies                    │
+│  express.static()     → No dependencies                    │
+│  session()            → No dependencies                    │
+│  passport.init()      → DEPENDS ON session()               │
+│  passport.session()   → DEPENDS ON passport.init()         │
+│  flash()              → DEPENDS ON session()               │
+│  res.locals           → DEPENDS ON passport (for req.user) │
+│  routes               → DEPENDS ON all above               │
+└────────────────────────────────────────────────────────────┘
+
+
+========================================
+1.9 — METHOD OVERRIDE EXPLAINED
+========================================
+
+PROBLEM:
+  HTML forms only support GET and POST methods.
+  But RESTful APIs need PUT and DELETE.
+
+SOLUTION: method-override middleware
+
+HOW IT WORKS:
+
+  <!-- HTML Form -->
+  <form method="POST" action="/blogs/123?_method=PUT">
+      <input type="text" name="title" value="Updated Title">
+      <button type="submit">Update</button>
+  </form>
+
+  <!-- What the server receives: -->
+  PUT /blogs/123
+  Body: { title: "Updated Title" }
+
+  <!-- For DELETE: -->
+  <form method="POST" action="/blogs/123?_method=DELETE">
+      <button type="submit">Delete</button>
+  </form>
+
+  <!-- What the server receives: -->
+  DELETE /blogs/123
+
+
+========================================
+1.10 — PROJECT SETUP SUMMARY
+========================================
+
+┌──────────────────────────────────────────────────────────────┐
+│  SETUP CHECKLIST                                              │
+│                                                               │
+│  ☑ 1. npm init -y                                            │
+│  ☑ 2. Install all dependencies                               │
+│  ☑ 3. Create folder structure (MVC)                          │
+│  ☑ 4. Create .env with PORT, MONGODB_URI, SESSION_SECRET     │
+│  ☑ 5. Create .gitignore (node_modules, .env)                 │
+│  ☑ 6. Setup config/db.js (MongoDB connection)                │
+│  ☑ 7. Setup app.js (middleware pipeline + routes)            │
+│  ☑ 8. Configure view engine (EJS)                            │
+│  ☑ 9. Configure static files directory                       │
+│  ☑ 10. Add npm scripts (start, dev)                          │
+│  ☑ 11. Test with: npm run dev                                │
+│  ☑ 12. Verify MongoDB connection in terminal                 │
+└──────────────────────────────────────────────────────────────┘
+*/
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   TOPIC 2: AUTHENTICATION IN NODEJS (BLOG APP)                           ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+/*
+========================================
+2.1 — AUTHENTICATION vs AUTHORIZATION
+========================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  AUTHENTICATION (AuthN)          AUTHORIZATION (AuthZ)          │
+│  ═══════════════════            ═══════════════════             │
+│                                                                  │
+│  "WHO are you?"                 "WHAT can you do?"              │
+│                                                                  │
+│  ┌─────────────┐               ┌─────────────────┐             │
+│  │  Login Form  │               │  Can this user   │             │
+│  │  Email: ____ │               │  edit THIS blog? │             │
+│  │  Pass:  ____ │               │                   │             │
+│  │  [Submit]    │               │  Owner? → YES     │             │
+│  └─────────────┘               │  Other? → NO      │             │
+│                                 └─────────────────┘             │
+│                                                                  │
+│  Examples:                      Examples:                        │
+│  - Login with email/password    - Only authors can edit blogs   │
+│  - Login with Google            - Only admins can delete users  │
+│  - Login with GitHub            - Only premium users see content│
+│                                                                  │
+│  Middleware: passport.js        Middleware: custom ensureAuth   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+
+========================================
+2.2 — HOW SESSIONS WORK
+========================================
+
+SESSION-BASED AUTHENTICATION FLOW:
+
+  ┌──────────┐                    ┌──────────┐                ┌──────────┐
+  │  CLIENT  │                    │  SERVER  │                │ DATABASE │
+  │ (Browser)│                    │ (Express)│                │ (MongoDB)│
+  └────┬─────┘                    └────┬─────┘                └────┬─────┘
+       │                               │                           │
+       │  1. POST /auth/login          │                           │
+       │  { email, password }          │                           │
+       │──────────────────────────────►│                           │
+       │                               │  2. Find user by email    │
+       │                               │─────────────────────────►│
+       │                               │                           │
+       │                               │  3. Return user document  │
+       │                               │◄─────────────────────────│
+       │                               │                           │
+       │                               │  4. Compare password      │
+       │                               │     bcrypt.compare()      │
+       │                               │                           │
+       │                               │  5. Create SESSION        │
+       │                               │     Store user.id         │
+       │                               │     in session store      │
+       │                               │                           │
+       │  6. Set-Cookie: session_id    │                           │
+       │◄──────────────────────────────│                           │
+       │                               │                           │
+       │  7. GET /blogs (with cookie)  │                           │
+       │──────────────────────────────►│                           │
+       │                               │  8. Read session_id       │
+       │                               │     from cookie           │
+       │                               │                           │
+       │                               │  9. Deserialize:          │
+       │                               │     Find user by ID       │
+       │                               │─────────────────────────►│
+       │                               │                           │
+       │                               │  10. Attach to req.user   │
+       │                               │◄─────────────────────────│
+       │                               │                           │
+       │  11. HTML Response            │                           │
+       │◄──────────────────────────────│                           │
+       │                               │                           │
+
+
+SESSION vs TOKEN (JWT) COMPARISON:
+┌───────────────────┬─────────────────────┬──────────────────────┐
+│ Feature           │ Session-Based       │ Token-Based (JWT)    │
+├───────────────────┼─────────────────────┼──────────────────────┤
+│ Storage           │ Server-side         │ Client-side          │
+│ Scalability       │ Harder (sticky      │ Easier (stateless)   │
+│                   │ sessions needed)    │                      │
+│ Revocation        │ Easy (delete        │ Hard (wait for       │
+│                   │ session)            │ expiry)              │
+│ Best for          │ Server-rendered     │ APIs, SPAs,          │
+│                   │ apps (EJS, Pug)     │ mobile apps          │
+│ Security          │ CSRF risk           │ XSS risk             │
+│ We use            │ ✅ THIS ONE          │                      │
+└───────────────────┴─────────────────────┴──────────────────────┘
+
+
+========================================
+2.3 — USER MODEL (models/User.js)
+========================================
+*/
+
+const user_model_code = `
+const mongoose = require('mongoose');
+const bcrypt   = require('bcryptjs');
+
+// ==========================================
+// SCHEMA DEFINITION
+// ==========================================
+const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: [true, 'Username is required'],
+        unique: true,
+        trim: true,
+        minlength: [3, 'Username must be at least 3 characters'],
+        maxlength: [30, 'Username cannot exceed 30 characters']
+    },
+    email: {
+        type: String,
+        required: [true, 'Email is required'],
+        unique: true,
+        lowercase: true,
+        match: [
+            /^\\w+([.-]?\\w+)*@\\w+([.-]?\\w+)*(\\.\\w{2,3})+$/,
+            'Please provide a valid email'
+        ]
+    },
+    password: {
+        type: String,
+        required: [true, 'Password is required'],
+        minlength: [6, 'Password must be at least 6 characters']
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    }
+}, {
+    timestamps: true   // Auto createdAt, updatedAt
+});
+
+// ==========================================
+// PRE-SAVE HOOK: Hash password before saving
+// ==========================================
+/*
+  WHY PRE-SAVE HOOK?
+  → Automatically runs before every .save()
+  → No need to hash manually in controllers
+  → Single source of truth for password hashing
+
+  WHY CHECK isModified?
+  → On user update (e.g., change username), password
+    would get re-hashed if we don't check
+  → Only hash when password is new or changed
+*/
+userSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next();
+
+    const salt = await bcrypt.genSalt(12);      // 12 rounds (more secure)
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+// ==========================================
+// INSTANCE METHOD: Compare passwords
+// ==========================================
+/*
+  USAGE: const isMatch = await user.comparePassword('inputPassword');
+
+  HOW bcrypt.compare WORKS:
+  1. Extract salt from stored hash
+  2. Hash the input with same salt
+  3. Compare the two hashes
+  4. Return true/false
+*/
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// ==========================================
+// STATIC METHOD: Find by email
+// ==========================================
+userSchema.statics.findByEmail = function(email) {
+    return this.findOne({ email: email.toLowerCase() });
+};
+
+module.exports = mongoose.model('User', userSchema);
+`;
+
+/*
+PASSWORD SECURITY DEEP DIVE:
+============================
+
+Plain text:    "mypassword123"
+                    │
+                    ▼
+bcrypt.genSalt(12)  → Generates random salt
+                    │
+                    ▼
+Salt:          "$2a$12$LJ3m4ys3Gkl0TbKjYR8Ohe"
+                    │
+                    ▼
+bcrypt.hash()  → Combines password + salt + hashes
+                    │
+                    ▼
+Stored hash:   "$2a$12$LJ3m4ys3Gkl0TbKjYR8OheK8XjGqVU2sFzH4K8YJsNPt7.9olCfO"
+
+ANATOMY OF A BCRYPT HASH:
+$2a$12$LJ3m4ys3Gkl0TbKjYR8OheK8XjGqVU2sFzH4K8YJsNPt7.9olCfO
+ │   │  │                      │
+ │   │  └── Salt (22 chars)    └── Hash (31 chars)
+ │   │
+ │   └── Cost factor (12 rounds = 2^12 = 4096 iterations)
+ │
+ └── Algorithm identifier (2a = bcrypt)
+
+COST FACTOR COMPARISON:
+┌────────┬────────────────┬───────────────────┐
+│ Rounds │ Time to Hash   │ Security Level    │
+├────────┼────────────────┼───────────────────┤
+│ 10     │ ~100ms         │ Good (minimum)    │
+│ 12     │ ~300ms         │ Better ✅         │
+│ 14     │ ~1 second      │ Strong            │
+│ 16     │ ~4 seconds     │ Very strong       │
+└────────┴────────────────┴───────────────────┘
+
+
+========================================
+2.4 — PASSPORT CONFIGURATION (config/passport.js)
+========================================
+*/
+
+const passport_config_code = `
+const LocalStrategy = require('passport-local').Strategy;
+const User          = require('../models/User');
+
+module.exports = function(passport) {
+
+    // ==========================================
+    // STRATEGY: Local (Email + Password)
+    // ==========================================
+    /*
+      Passport strategies define HOW authentication works.
+      LocalStrategy = traditional email + password login.
+
+      Other strategies available:
+      - passport-google-oauth20 (Google login)
+      - passport-github2 (GitHub login)
+      - passport-facebook (Facebook login)
+      - passport-jwt (JSON Web Token)
+    */
+    passport.use(new LocalStrategy(
+        {
+            usernameField: 'email',      // Map form field 'email' to username
+            passwordField: 'password'     // Map form field 'password'
+        },
+        async (email, password, done) => {
+            try {
+                // Step 1: Find user by email
+                const user = await User.findByEmail(email);
+
+                if (!user) {
+                    // null = no error, false = no user, message = reason
+                    return done(null, false, {
+                        message: 'No account found with that email'
+                    });
+                }
+
+                // Step 2: Compare passwords
+                const isMatch = await user.comparePassword(password);
+
+                if (!isMatch) {
+                    return done(null, false, {
+                        message: 'Incorrect password'
+                    });
+                }
+
+                // Step 3: Authentication successful
+                return done(null, user);
+
+            } catch (error) {
+                return done(error);
+            }
+        }
+    ));
+
+    // ==========================================
+    // SERIALIZE: Store user ID in session
+    // ==========================================
+    /*
+      Called ONCE after successful login.
+      Determines WHAT data to store in the session.
+      We store only the user ID (minimal data = faster).
+    */
+    passport.serializeUser((user, done) => {
+        done(null, user.id);  // Store user.id in session
+    });
+
+    // ==========================================
+    // DESERIALIZE: Retrieve full user from session
+    // ==========================================
+    /*
+      Called on EVERY subsequent request.
+      Uses the stored ID to fetch the full user object.
+      Attaches the user to req.user.
+    */
+    passport.deserializeUser(async (id, done) => {
+        try {
+            const user = await User.findById(id).select('-password');
+            // select('-password') excludes password from the object
+            done(null, user);
+        } catch (error) {
+            done(error, null);
+        }
+    });
+};
+`;
+
+/*
+PASSPORT CALLBACK PATTERN: done(error, user, info)
+
+  done(null, user)           → Success: user authenticated
+  done(null, false, {msg})   → Failure: invalid credentials
+  done(error)                → Error: server/database error
+
+SERIALIZE/DESERIALIZE LIFECYCLE:
+
+  LOGIN:
+  ======
+  User logs in successfully
+       │
+       ▼
+  serializeUser(user, done)
+       │
+       ▼
+  done(null, user.id)  → Store "user.id" in session
+       │
+       ▼
+  Session: { passport: { user: "64a1b2c3..." } }
+       │
+       ▼
+  Cookie sent to browser: connect.sid=s%3A...
+
+  EVERY SUBSEQUENT REQUEST:
+  =========================
+  Browser sends cookie
+       │
+       ▼
+  Session looked up by cookie
+       │
+       ▼
+  deserializeUser(id, done)
+       │
+       ▼
+  User.findById(id)  → Fetch full user from DB
+       │
+       ▼
+  done(null, user)  → Attach to req.user
+       │
+       ▼
+  Route handler can access req.user
+
+
+========================================
+2.5 — AUTH CONTROLLER (controllers/authController.js)
+========================================
+*/
+
+const auth_controller_code = `
+const User     = require('../models/User');
+const passport = require('passport');
+
+// ==========================================
+// SHOW REGISTRATION FORM
+// ==========================================
+exports.showRegisterForm = (req, res) => {
+    res.render('auth/register', { title: 'Register' });
+};
+
+// ==========================================
+// HANDLE REGISTRATION
+// ==========================================
+exports.register = async (req, res) => {
+    try {
+        const { username, email, password, confirmPassword } = req.body;
+
+        // ---- VALIDATION ----
+        const errors = [];
+
+        if (!username || !email || !password || !confirmPassword) {
+            errors.push('All fields are required');
+        }
+
+        if (password !== confirmPassword) {
+            errors.push('Passwords do not match');
+        }
+
+        if (password && password.length < 6) {
+            errors.push('Password must be at least 6 characters');
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({
+            $or: [{ email }, { username }]
+        });
+
+        if (existingUser) {
+            if (existingUser.email === email) {
+                errors.push('Email already registered');
+            }
+            if (existingUser.username === username) {
+                errors.push('Username already taken');
+            }
+        }
+
+        // If errors, re-render form with error messages
+        if (errors.length > 0) {
+            return res.render('auth/register', {
+                title: 'Register',
+                errors,
+                username,   // Preserve form data
+                email       // so user doesn't re-type
+            });
+        }
+
+        // ---- CREATE USER ----
+        const newUser = new User({ username, email, password });
+        await newUser.save();
+        // Password is auto-hashed by pre-save hook!
+
+        req.flash('success', 'Registration successful! Please login.');
+        res.redirect('/auth/login');
+
+    } catch (error) {
+        console.error('Registration error:', error);
+        req.flash('error', 'Something went wrong. Please try again.');
+        res.redirect('/auth/register');
+    }
+};
+
+// ==========================================
+// SHOW LOGIN FORM
+// ==========================================
+exports.showLoginForm = (req, res) => {
+    res.render('auth/login', { title: 'Login' });
+};
+
+// ==========================================
+// HANDLE LOGIN
+// ==========================================
+/*
+  passport.authenticate() is a middleware function.
+  It calls the LocalStrategy we defined in config/passport.js.
+
+  Options:
+  - successRedirect: where to go after successful login
+  - failureRedirect: where to go after failed login
+  - failureFlash: show error message from strategy
+*/
+exports.login = (req, res, next) => {
+    passport.authenticate('local', {
+        successRedirect: '/blogs',
+        failureRedirect: '/auth/login',
+        failureFlash: true    // Uses the message from done(null, false, {message})
+    })(req, res, next);
+};
+
+// ==========================================
+// HANDLE LOGOUT
+// ==========================================
+exports.logout = (req, res, next) => {
+    req.logout(function(err) {
+        if (err) return next(err);
+        req.flash('success', 'You have been logged out');
+        res.redirect('/auth/login');
+    });
+};
+`;
+
+/*
+========================================
+2.6 — AUTH ROUTES (routes/authRoutes.js)
+========================================
+*/
+
+const auth_routes_code = `
+const express        = require('express');
+const router         = express.Router();
+const authController = require('../controllers/authController');
+
+// Middleware: redirect if already logged in
+const ensureGuest = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return res.redirect('/blogs');
+    }
+    next();
+};
+
+// ==========================================
+// AUTH ROUTES
+// ==========================================
+/*
+  METHOD   URL               CONTROLLER             MIDDLEWARE
+  ──────   ────────────────  ────────────────────    ──────────
+  GET      /auth/register    showRegisterForm        ensureGuest
+  POST     /auth/register    register                ensureGuest
+  GET      /auth/login       showLoginForm           ensureGuest
+  POST     /auth/login       login                   ensureGuest
+  GET      /auth/logout      logout                  (none)
+*/
+
+router.get('/register',  ensureGuest, authController.showRegisterForm);
+router.post('/register', ensureGuest, authController.register);
+router.get('/login',     ensureGuest, authController.showLoginForm);
+router.post('/login',    ensureGuest, authController.login);
+router.get('/logout',    authController.logout);
+
+module.exports = router;
+`;
+
+/*
+========================================
+2.7 — AUTH MIDDLEWARE (middleware/authMiddleware.js)
+========================================
+*/
+
+const auth_middleware_code = `
+// ==========================================
+// PROTECT ROUTES: Must be logged in
+// ==========================================
+/*
+  req.isAuthenticated() → Provided by Passport.js
+  Returns true if user is logged in (session exists)
+  Returns false otherwise
+*/
+exports.ensureAuth = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();  // User is logged in → proceed to route
+    }
+    req.flash('error', 'Please login to access this page');
+    res.redirect('/auth/login');
+};
+
+// ==========================================
+// PROTECT ROUTES: Must NOT be logged in
+// ==========================================
+exports.ensureGuest = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return res.redirect('/blogs');  // Already logged in → redirect
+    }
+    next();
+};
+
+// ==========================================
+// AUTHORIZATION: Check resource ownership
+// ==========================================
+/*
+  AUTHENTICATION = Are you logged in?
+  AUTHORIZATION  = Are you ALLOWED to do this?
+
+  Example: User A should NOT edit User B's blog post
+*/
+exports.ensureOwner = (model) => {
+    return async (req, res, next) => {
+        try {
+            const resource = await model.findById(req.params.id);
+
+            if (!resource) {
+                req.flash('error', 'Resource not found');
+                return res.redirect('/blogs');
+            }
+
+            // Compare the resource's author with logged-in user
+            if (resource.author.toString() !== req.user._id.toString()) {
+                req.flash('error', 'You are not authorized to do this');
+                return res.redirect('/blogs');
+            }
+
+            // User owns this resource → proceed
+            next();
+
+        } catch (error) {
+            console.error(error);
+            res.redirect('/blogs');
+        }
+    };
+};
+`;
+
+/*
+MIDDLEWARE USAGE IN ROUTES:
+
+  const { ensureAuth, ensureOwner } = require('../middleware/authMiddleware');
+  const Blog = require('../models/Blog');
+
+  // Anyone can view blogs
+  router.get('/', blogController.getAllBlogs);
+
+  // Must be logged in to create
+  router.post('/', ensureAuth, blogController.createBlog);
+
+  // Must be logged in AND must be the author to edit/delete
+  router.put('/:id',    ensureAuth, ensureOwner(Blog), blogController.updateBlog);
+  router.delete('/:id', ensureAuth, ensureOwner(Blog), blogController.deleteBlog);
+
+
+========================================
+2.8 — AUTH VIEWS (EJS Templates)
+========================================
+
+views/auth/register.ejs:
+*/
+
+const register_ejs = `
+<%- include('../partials/header') %>
+
+<div class="auth-container">
+    <h1>Create Account</h1>
+
+    <%# Display validation errors %>
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="alert alert-danger">
+            <% errors.forEach(error => { %>
+                <p><%= error %></p>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <%# Display flash messages %>
+    <% if (error_msg && error_msg.length > 0) { %>
+        <div class="alert alert-danger">
+            <% error_msg.forEach(msg => { %>
+                <p><%= msg %></p>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <form action="/auth/register" method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                value="<%= typeof username !== 'undefined' ? username : '' %>"
+                placeholder="Enter username"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="<%= typeof email !== 'undefined' ? email : '' %>"
+                placeholder="Enter email"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter password (min 6 chars)"
+                required
+                minlength="6"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm password"
+                required
+            >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="/auth/login">Login here</a></p>
+</div>
+
+<%- include('../partials/footer') %>
+`;
+
+/*
+views/auth/login.ejs:
+*/
+
+const login_ejs = `
+<%- include('../partials/header') %>
+
+<div class="auth-container">
+    <h1>Login</h1>
+
+    <%# Flash messages %>
+    <% if (success_msg && success_msg.length > 0) { %>
+        <div class="alert alert-success">
+            <% success_msg.forEach(msg => { %>
+                <p><%= msg %></p>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <% if (error_msg && error_msg.length > 0) { %>
+        <div class="alert alert-danger">
+            <% error_msg.forEach(msg => { %>
+                <p><%= msg %></p>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <%# Passport error messages %>
+    <% if (passport_error && passport_error.length > 0) { %>
+        <div class="alert alert-danger">
+            <% passport_error.forEach(msg => { %>
+                <p><%= msg %></p>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <form action="/auth/login" method="POST">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+            >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="/auth/register">Register here</a></p>
+</div>
+
+<%- include('../partials/footer') %>
+`;
+
+/*
+========================================
+2.9 — COMPLETE AUTH FLOW DIAGRAM
+========================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│                   REGISTRATION FLOW                              │
+│                                                                  │
+│  User fills form → POST /auth/register                          │
+│       │                                                          │
+│       ▼                                                          │
+│  authController.register()                                       │
+│       │                                                          │
+│       ├── Validate input (empty fields, password match)         │
+│       │       │                                                  │
+│       │       ├── Errors? → Re-render form with errors          │
+│       │       │                                                  │
+│       │       └── Valid? → Continue ▼                            │
+│       │                                                          │
+│       ├── Check if user exists (email/username)                 │
+│       │       │                                                  │
+│       │       ├── Exists? → Re-render with "already exists"     │
+│       │       │                                                  │
+│       │       └── New? → Continue ▼                              │
+│       │                                                          │
+│       ├── Create new User({ username, email, password })         │
+│       │                                                          │
+│       ├── user.save() triggers pre-save hook                     │
+│       │       │                                                  │
+│       │       └── bcrypt hashes password automatically           │
+│       │                                                          │
+│       ├── Flash success message                                  │
+│       │                                                          │
+│       └── Redirect to /auth/login                                │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                      LOGIN FLOW                                  │
+│                                                                  │
+│  User fills form → POST /auth/login                             │
+│       │                                                          │
+│       ▼                                                          │
+│  passport.authenticate('local')                                  │
+│       │                                                          │
+│       ▼                                                          │
+│  LocalStrategy callback executes:                                │
+│       │                                                          │
+│       ├── User.findByEmail(email)                                │
+│       │       │                                                  │
+│       │       ├── Not found → done(null, false, 'No account')   │
+│       │       │                   │                              │
+│       │       │                   └── failureRedirect → /login   │
+│       │       │                                                  │
+│       │       └── Found → Continue ▼                             │
+│       │                                                          │
+│       ├── user.comparePassword(password)                         │
+│       │       │                                                  │
+│       │       ├── No match → done(null, false, 'Wrong password')│
+│       │       │                  │                               │
+│       │       │                  └── failureRedirect → /login    │
+│       │       │                                                  │
+│       │       └── Match → done(null, user) ✅                    │
+│       │                                                          │
+│       ├── serializeUser(user) → Store user.id in session        │
+│       │                                                          │
+│       ├── Set session cookie in browser                          │
+│       │                                                          │
+│       └── successRedirect → /blogs                               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+
+========================================
+2.10 — AUTH SECURITY BEST PRACTICES
+========================================
+
+┌──────────────────────────────────────────────────────────────┐
+│                SECURITY CHECKLIST                             │
+│                                                               │
+│  ✅ Hash passwords with bcrypt (12+ rounds)                  │
+│  ✅ Use HTTPS in production (prevents packet sniffing)       │
+│  ✅ Set httpOnly: true on cookies (prevents XSS access)     │
+│  ✅ Set secure: true on cookies in production                │
+│  ✅ Validate input on BOTH client and server                 │
+│  ✅ Use parameterized queries (Mongoose handles this)        │
+│  ✅ Implement rate limiting on login routes                  │
+│  ✅ Use CSRF tokens for form submissions                     │
+│  ✅ Don't expose user details in error messages              │
+│     (say "Invalid credentials" not "Wrong password")         │
+│  ✅ Store session secret in .env (not in code)               │
+│  ✅ Use select('-password') when fetching users               │
+│  ✅ Implement account lockout after N failed attempts        │
+│                                                               │
+│  ❌ NEVER store plain text passwords                         │
+│  ❌ NEVER log passwords to console                           │
+│  ❌ NEVER send passwords in URLs (query strings)             │
+│  ❌ NEVER trust client-side validation alone                 │
+│  ❌ NEVER commit .env or secrets to version control          │
+└──────────────────────────────────────────────────────────────┘
+*/
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   TOPIC 3: COMPLETE BLOG APP (NODEJS + MONGODB + EJS)                    ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+/*
+========================================
+3.1 — BLOG MODEL (models/Blog.js)
+========================================
+*/
+
+const blog_model_code = `
+const mongoose = require('mongoose');
+
+const blogSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: [true, 'Title is required'],
+        trim: true,
+        maxlength: [200, 'Title cannot exceed 200 characters']
+    },
+    slug: {
+        type: String,
+        unique: true
+        // Auto-generated from title (see pre-save hook)
+    },
+    body: {
+        type: String,
+        required: [true, 'Blog content is required']
+    },
+    excerpt: {
+        type: String,
+        maxlength: [500, 'Excerpt cannot exceed 500 characters']
+        // Auto-generated from body if not provided
+    },
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',                          // References User model
+        required: true
+    },
+    tags: {
+        type: [String],
+        default: [],
+        // Setter to clean up tags
+        set: function(tags) {
+            if (typeof tags === 'string') {
+                return tags.split(',').map(t => t.trim().toLowerCase());
+            }
+            return tags.map(t => t.trim().toLowerCase());
+        }
+    },
+    coverImage: {
+        type: String,
+        default: '/images/default-blog.jpg'
+    },
+    status: {
+        type: String,
+        enum: ['draft', 'published'],
+        default: 'draft'
+    },
+    views: {
+        type: Number,
+        default: 0
+    }
+}, {
+    timestamps: true        // createdAt + updatedAt
+});
+
+// ==========================================
+// INDEXES for faster queries
+// ==========================================
+blogSchema.index({ author: 1 });           // Fast lookup by author
+blogSchema.index({ status: 1 });           // Fast lookup by status
+blogSchema.index({ tags: 1 });             // Fast lookup by tags
+blogSchema.index({ createdAt: -1 });       // Fast sort by date
+blogSchema.index({                         // Text search index
+    title: 'text',
+    body: 'text'
+});
+
+// ==========================================
+// PRE-SAVE: Generate slug and excerpt
+// ==========================================
+blogSchema.pre('save', function(next) {
+    // Generate URL-friendly slug from title
+    if (this.isModified('title')) {
+        this.slug = this.title
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9]/g, '-')   // Replace non-alphanumeric
+            .replace(/-+/g, '-')               // Replace multiple dashes
+            .replace(/^-|-$/g, '');            // Remove leading/trailing dashes
+    }
+
+    // Auto-generate excerpt from body (first 150 chars)
+    if (this.isModified('body') && !this.excerpt) {
+        this.excerpt = this.body.substring(0, 150) + '...';
+    }
+
+    next();
+});
+
+// ==========================================
+// VIRTUAL: Reading time calculation
+// ==========================================
+/*
+  Virtuals are computed properties that are NOT stored in DB.
+  Average reading speed: 200 words per minute
+*/
+blogSchema.virtual('readingTime').get(function() {
+    const wordCount = this.body.split(/\\s+/).length;
+    const minutes   = Math.ceil(wordCount / 200);
+    return minutes + ' min read';
+});
+
+// Ensure virtuals are included in JSON/Object output
+blogSchema.set('toJSON', { virtuals: true });
+blogSchema.set('toObject', { virtuals: true });
+
+module.exports = mongoose.model('Blog', blogSchema);
+`;
+
+/*
+BLOG DOCUMENT EXAMPLE (stored in MongoDB):
+==========================================
+
+{
+    "_id": ObjectId("64a1b2c3d4e5f6a7b8c9d0e1"),
+    "title": "Getting Started with Node.js",
+    "slug": "getting-started-with-node-js",
+    "body": "Node.js is an open-source, cross-platform...",
+    "excerpt": "Node.js is an open-source, cross-platform...",
+    "author": ObjectId("64a1b2c3d4e5f6a7b8c9d0e2"),
+    "tags": ["nodejs", "javascript", "backend"],
+    "coverImage": "/images/default-blog.jpg",
+    "status": "published",
+    "views": 42,
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T14:45:00.000Z"
+}
+
+VIRTUAL (computed, NOT stored):
+  readingTime: "5 min read"
+
+
+========================================
+3.2 — BLOG CONTROLLER (controllers/blogController.js)
+========================================
+*/
+
+const blog_controller_code = `
+const Blog = require('../models/Blog');
+
+// ==========================================
+// GET ALL BLOGS (with pagination & search)
+// ==========================================
+exports.getAllBlogs = async (req, res) => {
+    try {
+        // Pagination
+        const page    = parseInt(req.query.page) || 1;
+        const limit   = parseInt(req.query.limit) || 10;
+        const skip    = (page - 1) * limit;
+
+        // Search filter
+        let filter = { status: 'published' };
+
+        // Search by keyword
+        if (req.query.search) {
+            filter.$text = { $search: req.query.search };
+        }
+
+        // Filter by tag
+        if (req.query.tag) {
+            filter.tags = req.query.tag.toLowerCase();
+        }
+
+        // Execute query with population, sorting, pagination
+        const blogs = await Blog.find(filter)
+            .populate('author', 'username')    // Get author's username
+            .sort({ createdAt: -1 })           // Newest first
+            .skip(skip)                         // Pagination offset
+            .limit(limit);                      // Pagination limit
+
+        // Get total count for pagination
+        const totalBlogs = await Blog.countDocuments(filter);
+        const totalPages = Math.ceil(totalBlogs / limit);
+
+        res.render('blogs/index', {
+            title: 'All Blogs',
+            blogs,
+            currentPage: page,
+            totalPages,
+            search: req.query.search || '',
+            tag: req.query.tag || ''
+        });
+
+    } catch (error) {
+        console.error('Error fetching blogs:', error);
+        req.flash('error', 'Failed to load blogs');
+        res.redirect('/');
+    }
+};
+
+// ==========================================
+// GET SINGLE BLOG
+// ==========================================
+exports.getBlogById = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id)
+            .populate('author', 'username email');
+
+        if (!blog) {
+            req.flash('error', 'Blog not found');
+            return res.redirect('/blogs');
+        }
+
+        // Increment view count (don't await, fire and forget)
+        Blog.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } }).exec();
+
+        // Check if current user is the author
+        const isAuthor = req.user &&
+            blog.author._id.toString() === req.user._id.toString();
+
+        res.render('blogs/show', {
+            title: blog.title,
+            blog,
+            isAuthor
+        });
+
+    } catch (error) {
+        console.error('Error fetching blog:', error);
+        req.flash('error', 'Blog not found');
+        res.redirect('/blogs');
+    }
+};
+
+// ==========================================
+// SHOW CREATE FORM
+// ==========================================
+exports.showCreateForm = (req, res) => {
+    res.render('blogs/new', { title: 'Create New Blog' });
+};
+
+// ==========================================
+// CREATE BLOG
+// ==========================================
+exports.createBlog = async (req, res) => {
+    try {
+        const { title, body, tags, status, coverImage } = req.body;
+
+        const newBlog = new Blog({
+            title,
+            body,
+            tags,                      // Setter in schema handles parsing
+            status: status || 'draft',
+            coverImage: coverImage || undefined,
+            author: req.user._id       // From passport session
+        });
+
+        const savedBlog = await newBlog.save();
+
+        req.flash('success', 'Blog created successfully!');
+        res.redirect('/blogs/' + savedBlog._id);
+
+    } catch (error) {
+        console.error('Error creating blog:', error);
+        res.render('blogs/new', {
+            title: 'Create New Blog',
+            error: error.message,
+            blog: req.body            // Preserve form data
+        });
+    }
+};
+
+// ==========================================
+// SHOW EDIT FORM
+// ==========================================
+exports.showEditForm = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            req.flash('error', 'Blog not found');
+            return res.redirect('/blogs');
+        }
+
+        // Authorization check
+        if (blog.author.toString() !== req.user._id.toString()) {
+            req.flash('error', 'Not authorized');
+            return res.redirect('/blogs');
+        }
+
+        res.render('blogs/edit', {
+            title: 'Edit Blog',
+            blog
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.redirect('/blogs');
+    }
+};
+
+// ==========================================
+// UPDATE BLOG
+// ==========================================
+exports.updateBlog = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            req.flash('error', 'Blog not found');
+            return res.redirect('/blogs');
+        }
+
+        // Authorization check
+        if (blog.author.toString() !== req.user._id.toString()) {
+            req.flash('error', 'Not authorized');
+            return res.redirect('/blogs');
+        }
+
+        // Update fields
+        const { title, body, tags, status, coverImage } = req.body;
+        blog.title      = title;
+        blog.body       = body;
+        blog.tags       = tags;
+        blog.status     = status;
+        blog.coverImage = coverImage || blog.coverImage;
+
+        await blog.save();    // Triggers pre-save hook (slug regeneration)
+
+        req.flash('success', 'Blog updated successfully!');
+        res.redirect('/blogs/' + blog._id);
+
+    } catch (error) {
+        console.error('Error updating blog:', error);
+        req.flash('error', 'Failed to update blog');
+        res.redirect('/blogs/' + req.params.id + '/edit');
+    }
+};
+
+// ==========================================
+// DELETE BLOG
+// ==========================================
+exports.deleteBlog = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            req.flash('error', 'Blog not found');
+            return res.redirect('/blogs');
+        }
+
+        // Authorization check
+        if (blog.author.toString() !== req.user._id.toString()) {
+            req.flash('error', 'Not authorized');
+            return res.redirect('/blogs');
+        }
+
+        await Blog.findByIdAndDelete(req.params.id);
+
+        req.flash('success', 'Blog deleted successfully');
+        res.redirect('/blogs');
+
+    } catch (error) {
+        console.error('Error deleting blog:', error);
+        req.flash('error', 'Failed to delete blog');
+        res.redirect('/blogs');
+    }
+};
+
+// ==========================================
+// GET USER'S BLOGS (Dashboard)
+// ==========================================
+exports.getUserBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find({ author: req.user._id })
+            .sort({ createdAt: -1 });
+
+        res.render('blogs/dashboard', {
+            title: 'My Blogs',
+            blogs
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.redirect('/');
+    }
+};
+`;
+
+/*
+========================================
+3.3 — BLOG ROUTES (routes/blogRoutes.js)
+========================================
+*/
+
+const blog_routes_code = `
+const express        = require('express');
+const router         = express.Router();
+const blogController = require('../controllers/blogController');
+const { ensureAuth } = require('../middleware/authMiddleware');
+
+// ==========================================
+// RESTful ROUTES
+// ==========================================
+/*
+  ┌────────────────────────────────────────────────────────────────┐
+  │  HTTP     URL                  ACTION         AUTH    OWNER   │
+  │  METHOD                                       REQ?    REQ?   │
+  ├────────────────────────────────────────────────────────────────┤
+  │  GET      /blogs               List all       No      No     │
+  │  GET      /blogs/dashboard     User's blogs   Yes     -      │
+  │  GET      /blogs/new           Create form    Yes     -      │
+  │  POST     /blogs               Create blog    Yes     -      │
+  │  GET      /blogs/:id           Show one       No      No     │
+  │  GET      /blogs/:id/edit      Edit form      Yes     Yes    │
+  │  PUT      /blogs/:id           Update blog    Yes     Yes    │
+  │  DELETE   /blogs/:id           Delete blog    Yes     Yes    │
+  └────────────────────────────────────────────────────────────────┘
+
+  ⚠️ ORDER MATTERS!
+  /blogs/new MUST come BEFORE /blogs/:id
+  Otherwise Express treats "new" as an :id parameter
+*/
+
+// Public routes
+router.get('/',          blogController.getAllBlogs);
+
+// Auth-required routes (place specific routes BEFORE parameterized ones)
+router.get('/dashboard', ensureAuth, blogController.getUserBlogs);
+router.get('/new',       ensureAuth, blogController.showCreateForm);
+router.post('/',         ensureAuth, blogController.createBlog);
+
+// Parameterized routes (MUST come after /new, /dashboard)
+router.get('/:id',       blogController.getBlogById);
+router.get('/:id/edit',  ensureAuth, blogController.showEditForm);
+router.put('/:id',       ensureAuth, blogController.updateBlog);
+router.delete('/:id',    ensureAuth, blogController.deleteBlog);
+
+module.exports = router;
+`;
+
+/*
+========================================
+3.4 — EJS VIEWS
+========================================
+
+views/partials/header.ejs:
+*/
+
+const header_ejs = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' | BlogApp' : 'BlogApp' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">📝 BlogApp</a>
+
+            <div class="nav-links">
+                <a href="/blogs">All Blogs</a>
+
+                <% if (currentUser) { %>
+                    <a href="/blogs/dashboard">My Blogs</a>
+                    <a href="/blogs/new">Write Blog</a>
+                    <span class="nav-user">Hello, <%= currentUser.username %></span>
+                    <a href="/auth/logout" class="btn btn-outline">Logout</a>
+                <% } else { %>
+                    <a href="/auth/login" class="btn btn-outline">Login</a>
+                    <a href="/auth/register" class="btn btn-primary">Register</a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <%# Flash Messages %>
+    <div class="container">
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success">
+                <% success_msg.forEach(msg => { %>
+                    <p><%= msg %></p>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger">
+                <% error_msg.forEach(msg => { %>
+                    <p><%= msg %></p>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+
+    <main class="container">
+`;
+
+/*
+views/partials/footer.ejs:
+*/
+
+const footer_ejs = `
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; <%= new Date().getFullYear() %> BlogApp. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
+`;
+
+/*
+views/blogs/index.ejs:
+*/
+
+const blogs_index_ejs = `
+<%- include('../partials/header') %>
+
+<div class="blogs-page">
+    <div class="page-header">
+        <h1>All Blog Posts</h1>
+
+        <%# Search Form %>
+        <form action="/blogs" method="GET" class="search-form">
+            <input
+                type="text"
+                name="search"
+                placeholder="Search blogs..."
+                value="<%= search %>"
+            >
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <%# Blog Cards %>
+    <% if (blogs.length > 0) { %>
+        <div class="blog-grid">
+            <% blogs.forEach(blog => { %>
+                <article class="blog-card">
+                    <img src="<%= blog.coverImage %>" alt="<%= blog.title %>" class="blog-cover">
+
+                    <div class="blog-card-body">
+                        <div class="blog-meta">
+                            <span class="author">By <%= blog.author.username %></span>
+                            <span class="date">
+                                <%= blog.createdAt.toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                }) %>
+                            </span>
+                            <span class="reading-time"><%= blog.readingTime %></span>
+                        </div>
+
+                        <h2 class="blog-title">
+                            <a href="/blogs/<%= blog._id %>"><%= blog.title %></a>
+                        </h2>
+
+                        <p class="blog-excerpt"><%= blog.excerpt %></p>
+
+                        <div class="blog-tags">
+                            <% blog.tags.forEach(tag => { %>
+                                <a href="/blogs?tag=<%= tag %>" class="tag">#<%= tag %></a>
+                            <% }) %>
+                        </div>
+
+                        <a href="/blogs/<%= blog._id %>" class="read-more">
+                            Read More →
+                        </a>
+                    </div>
+                </article>
+            <% }) %>
+        </div>
+
+        <%# Pagination %>
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a href="/blogs?page=<%= currentPage - 1 %>" class="page-link">← Previous</a>
+            <% } %>
+
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/blogs?page=<%= i %>"
+                   class="page-link <%= i === currentPage ? 'active' : '' %>">
+                    <%= i %>
+                </a>
+            <% } %>
+
+            <% if (currentPage < totalPages) { %>
+                <a href="/blogs?page=<%= currentPage + 1 %>" class="page-link">Next →</a>
+            <% } %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <h2>No blogs found</h2>
+            <p>Be the first to share your thoughts!</p>
+            <% if (currentUser) { %>
+                <a href="/blogs/new" class="btn btn-primary">Write a Blog</a>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>
+`;
+
+/*
+views/blogs/show.ejs:
+*/
+
+const blog_show_ejs = `
+<%- include('../partials/header') %>
+
+<article class="blog-detail">
+    <header class="blog-header">
+        <h1><%= blog.title %></h1>
+
+        <div class="blog-meta">
+            <span class="author">By <%= blog.author.username %></span>
+            <span class="date"><%= blog.createdAt.toLocaleDateString() %></span>
+            <span class="views"><%= blog.views %> views</span>
+            <span class="reading-time"><%= blog.readingTime %></span>
+        </div>
+
+        <div class="blog-tags">
+            <% blog.tags.forEach(tag => { %>
+                <a href="/blogs?tag=<%= tag %>" class="tag">#<%= tag %></a>
+            <% }) %>
+        </div>
+    </header>
+
+    <% if (blog.coverImage) { %>
+        <img src="<%= blog.coverImage %>" alt="<%= blog.title %>" class="blog-cover-full">
+    <% } %>
+
+    <div class="blog-body">
+        <%- blog.body %>
+        <%# Using <%- (unescaped) to render HTML in blog body %>
+        <%# ⚠️ Make sure to sanitize input before saving! %>
+    </div>
+
+    <%# Show edit/delete buttons only for the author %>
+    <% if (isAuthor) { %>
+        <div class="blog-actions">
+            <a href="/blogs/<%= blog._id %>/edit" class="btn btn-secondary">
+                ✏️ Edit
+            </a>
+
+            <form action="/blogs/<%= blog._id %>?_method=DELETE"
+                  method="POST"
+                  class="inline-form"
+                  onsubmit="return confirm('Are you sure you want to delete this blog?')">
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Delete
+                </button>
+            </form>
+        </div>
+    <% } %>
+
+    <a href="/blogs" class="back-link">← Back to all blogs</a>
+</article>
+
+<%- include('../partials/footer') %>
+`;
+
+/*
+views/blogs/new.ejs:
+*/
+
+const blog_new_ejs = `
+<%- include('../partials/header') %>
+
+<div class="blog-form-container">
+    <h1>Create New Blog Post</h1>
+
+    <% if (typeof error !== 'undefined') { %>
+        <div class="alert alert-danger">
+            <p><%= error %></p>
+        </div>
+    <% } %>
+
+    <form action="/blogs" method="POST" class="blog-form">
+        <div class="form-group">
+            <label for="title">Title *</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="<%= typeof blog !== 'undefined' ? blog.title : '' %>"
+                placeholder="Enter blog title"
+                required
+                maxlength="200"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="body">Content *</label>
+            <textarea
+                id="body"
+                name="body"
+                rows="15"
+                placeholder="Write your blog content here..."
+                required
+            ><%= typeof blog !== 'undefined' ? blog.body : '' %></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="tags">Tags (comma-separated)</label>
+            <input
+                type="text"
+                id="tags"
+                name="tags"
+                value="<%= typeof blog !== 'undefined' ? blog.tags : '' %>"
+                placeholder="nodejs, javascript, webdev"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="coverImage">Cover Image URL</label>
+            <input
+                type="url"
+                id="coverImage"
+                name="coverImage"
+                placeholder="https://example.com/image.jpg"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="draft">Draft (save for later)</option>
+                <option value="published">Published (visible to all)</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Blog</button>
+            <a href="/blogs" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>
+`;
+
+/*
+========================================
+3.5 — EJS SYNTAX CHEATSHEET
+========================================
+
+┌──────────────┬───────────────────────────────────────────────────┐
+│ SYNTAX       │ PURPOSE & EXAMPLE                                 │
+├──────────────┼───────────────────────────────────────────────────┤
+│ <%= %>       │ Output ESCAPED value (SAFE, prevents XSS)        │
+│              │ <%= user.name %>     →  John &lt;script&gt;      │
+│              │ HTML entities are escaped automatically           │
+├──────────────┼───────────────────────────────────────────────────┤
+│ <%- %>       │ Output UNESCAPED/RAW HTML (⚠️ DANGEROUS)          │
+│              │ <%- blog.body %>     →  <h1>Hello</h1>           │
+│              │ Use ONLY with sanitized/trusted content           │
+├──────────────┼───────────────────────────────────────────────────┤
+│ <% %>        │ Execute JavaScript (no output)                    │
+│              │ <% if (user) { %>                                 │
+│              │     <p>Hello</p>                                  │
+│              │ <% } %>                                           │
+├──────────────┼───────────────────────────────────────────────────┤
+│ <%- include  │ Include partial template                          │
+│ ('path') %>  │ <%- include('partials/header') %>                 │
+│              │ Path is relative to views directory               │
+├──────────────┼───────────────────────────────────────────────────┤
+│ <%# %>       │ Comment (NOT rendered in output HTML)             │
+│              │ <%# This is invisible to the browser %>           │
+├──────────────┼───────────────────────────────────────────────────┤
+│ <%_ %>       │ Whitespace trimming (start)                       │
+│ _%>          │ Removes preceding/trailing whitespace             │
+└──────────────┴───────────────────────────────────────────────────┘
+
+
+========================================
+3.6 — MONGOOSE QUERIES CHEATSHEET
+========================================
+
+// ============ CREATE ============
+const blog = new Blog({ title, body, author });
+await blog.save();                              // Instance method
+await Blog.create({ title, body, author });     // Static method
+
+// ============ READ ============
+await Blog.find();                              // All documents
+await Blog.find({ status: 'published' });       // With filter
+await Blog.findById(id);                        // By ObjectId
+await Blog.findOne({ slug: 'my-blog' });        // First match
+await Blog.countDocuments({ status: 'draft' }); // Count
+
+// ============ UPDATE ============
+await Blog.findByIdAndUpdate(id, { title: 'New' }, { new: true });
+blog.title = 'New';
+await blog.save();                              // Triggers hooks
+
+// ============ DELETE ============
+await Blog.findByIdAndDelete(id);
+await Blog.deleteMany({ status: 'draft' });
+
+// ============ ADVANCED ============
+await Blog.find()
+    .populate('author', 'username email')    // JOIN-like
+    .sort({ createdAt: -1 })                  // Sort descending
+    .skip(20)                                 // Pagination offset
+    .limit(10)                                // Pagination limit
+    .select('title body author')              // Select fields
+    .lean();                                  // Return plain JS objects
+
+// ============ TEXT SEARCH ============
+await Blog.find({ $text: { $search: 'nodejs express' } });
+
+// ============ COMPARISON ============
+await Blog.find({ views: { $gte: 100 } });     // views >= 100
+await Blog.find({ views: { $gt: 50, $lt: 200 } }); // 50 < views < 200
+
+// ============ ARRAY OPERATIONS ============
+await Blog.find({ tags: 'javascript' });        // Has this tag
+await Blog.find({ tags: { $in: ['js', 'node'] } }); // Has any of these
+await Blog.findByIdAndUpdate(id, {
+    $push: { tags: 'newTag' }                   // Add to array
+});
+
+
+========================================
+3.7 — COMPLETE REQUEST LIFECYCLE
+========================================
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │              FULL REQUEST → RESPONSE CYCLE                   │
+  │                                                              │
+  │  CLIENT: GET /blogs?page=2&tag=nodejs                       │
+  │       │                                                      │
+  │       ▼                                                      │
+  │  EXPRESS RECEIVES REQUEST                                    │
+  │       │                                                      │
+  │       ▼                                                      │
+  │  MIDDLEWARE PIPELINE:                                        │
+  │  ┌─────────────────────────┐                                │
+  │  │ 1. express.json()       │ → Parse body (none for GET)    │
+  │  │ 2. express.urlencoded() │ → Parse form data              │
+  │  │ 3. express.static()     │ → Not a static file, skip     │
+  │  │ 4. session()            │ → Load session from cookie     │
+  │  │ 5. passport.init()      │ → Initialize passport         │
+  │  │ 6. passport.session()   │ → Deserialize user from       │
+  │  │                         │   session (if logged in)       │
+  │  │ 7. flash()              │ → Load flash messages          │
+  │  │ 8. res.locals           │ → Set currentUser, messages    │
+  │  └────────────┬────────────┘                                │
+  │               ▼                                              │
+  │  ROUTER MATCHES: GET /blogs                                  │
+  │       │                                                      │
+  │       ▼                                                      │
+  │  blogController.getAllBlogs(req, res)                         │
+  │       │                                                      │
+  │       ├── Parse query params: page=2, tag=nodejs             │
+  │       │                                                      │
+  │       ├── Build filter: { status: 'published', tags: 'nodejs'}│
+  │       │                                                      │
+  │       ├── Blog.find(filter)                                  │
+  │       │       │                                              │
+  │       │       ▼                                              │
+  │       │   MONGOOSE → MongoDB Query                           │
+  │       │       │                                              │
+  │       │       ▼                                              │
+  │       │   MongoDB returns documents                          │
+  │       │       │                                              │
+  │       │       ▼                                              │
+  │       │   .populate('author') → Fetches user data            │
+  │       │   .sort({ createdAt: -1 })                           │
+  │       │   .skip(10).limit(10)                                │
+  │       │                                                      │
+  │       ├── blogs = [blog1, blog2, ...]                        │
+  │       │                                                      │
+  │       ▼                                                      │
+  │  res.render('blogs/index', { blogs, currentPage, ... })      │
+  │       │                                                      │
+  │       ▼                                                      │
+  │  EJS ENGINE:                                                 │
+  │  ┌────────────────────────────┐                              │
+  │  │ 1. Load blogs/index.ejs   │                              │
+  │  │ 2. Load partials          │                              │
+  │  │ 3. Execute JS in <% %>    │                              │
+  │  │ 4. Insert data in <%= %>  │                              │
+  │  │ 5. Generate final HTML    │                              │
+  │  └────────────┬───────────────┘                              │
+  │               ▼                                              │
+  │  HTML RESPONSE SENT TO CLIENT                                │
+  │       │                                                      │
+  │       ▼                                                      │
+  │  BROWSER RENDERS HTML                                        │
+  └─────────────────────────────────────────────────────────────┘
+*/
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   TOPIC 4: DEPLOY NODEJS APP ON AWS                                      ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+/*
+========================================
+4.1 — AWS DEPLOYMENT OPTIONS OVERVIEW
+========================================
+
+┌──────────────────────────────────────────────────────────────────┐
+│                AWS DEPLOYMENT OPTIONS                             │
+├──────────────┬────────────┬──────────────┬───────────────────────┤
+│ Service      │ Type       │ Complexity   │ Best For              │
+├──────────────┼────────────┼──────────────┼───────────────────────┤
+│ EC2          │ IaaS       │ ⭐⭐⭐        │ Full control, custom  │
+│              │            │              │ server setup          │
+├──────────────┼────────────┼──────────────┼───────────────────────┤
+│ Elastic      │ PaaS       │ ⭐⭐          │ Quick deployment      │
+│ Beanstalk    │            │              │ without managing infra│
+├──────────────┼────────────┼──────────────┼───────────────────────┤
+│ ECS/Fargate  │ Container  │ ⭐⭐⭐        │ Docker-based apps     │
+│              │            │              │ microservices         │
+├──────────────┼────────────┼──────────────┼───────────────────────┤
+│ Lambda       │ Serverless │ ⭐⭐          │ APIs, event-driven    │
+│              │            │              │ (not ideal for SSR)   │
+├──────────────┼────────────┼──────────────┼───────────────────────┤
+│ Lightsail    │ VPS        │ ⭐            │ Simple apps,          │
+│              │            │              │ beginners             │
+└──────────────┴────────────┴──────────────┴───────────────────────┘
+
+We'll focus on EC2 (most common, most educational).
+
+
+========================================
+4.2 — DEPLOYMENT ARCHITECTURE
+========================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│                  PRODUCTION ARCHITECTURE                         │
+│                                                                  │
+│  Internet                                                        │
+│     │                                                            │
+│     ▼                                                            │
+│  ┌──────────────────┐                                            │
+│  │   Route 53       │  DNS (yourblog.com → EC2 IP)              │
+│  │   (DNS Service)  │                                            │
+│  └────────┬─────────┘                                            │
+│           ▼                                                      │
+│  ┌──────────────────┐                                            │
+│  │   CloudFront     │  CDN (cache static assets globally)       │
+│  │   (CDN/SSL)      │  + SSL/HTTPS termination                  │
+│  └────────┬─────────┘                                            │
+│           ▼                                                      │
+│  ┌──────────────────┐                                            │
+│  │   ALB / ELB      │  Load Balancer (distribute traffic)       │
+│  │   (Load Balancer)│                                            │
+│  └────────┬─────────┘                                            │
+│           │                                                      │
+│     ┌─────┴──────┐                                               │
+│     ▼            ▼                                               │
+│  ┌────────┐  ┌────────┐                                          │
+│  │  EC2   │  │  EC2   │  Application Servers                     │
+│  │ inst 1 │  │ inst 2 │  (Node.js + Express)                    │
+│  └───┬────┘  └───┬────┘                                          │
+│      │           │                                               │
+│      └─────┬─────┘                                               │
+│            ▼                                                      │
+│  ┌──────────────────┐                                            │
+│  │  MongoDB Atlas   │  Database (managed cloud DB)              │
+│  │  (Database)      │                                            │
+│  └──────────────────┘                                            │
+│                                                                  │
+│  ┌──────────────────┐                                            │
+│  │      S3          │  Static file storage (uploads, images)    │
+│  │  (File Storage)  │                                            │
+│  └──────────────────┘                                            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+
+========================================
+4.3 — EC2 DEPLOYMENT STEP BY STEP
+========================================
+
+STEP 1: LAUNCH EC2 INSTANCE
+────────────────────────────
+
+  AWS Console → EC2 → Launch Instance
+
+  Settings:
+  ┌────────────────────┬──────────────────────────────────────┐
+  │ Setting            │ Value                                │
+  ├────────────────────┼──────────────────────────────────────┤
+  │ Name               │ blog-app-server                      │
+  │ AMI                │ Amazon Linux 2023 / Ubuntu 22.04     │
+  │ Instance Type      │ t2.micro (free tier)                 │
+  │ Key Pair           │ Create new → download .pem file      │
+  │ Security Group     │ Allow SSH(22), HTTP(80), HTTPS(443)  │
+  │ Storage            │ 20 GB gp3                            │
+  └────────────────────┴──────────────────────────────────────┘
+
+
+STEP 2: CONNECT TO EC2 VIA SSH
+───────────────────────────────
+*/
+
+// Terminal commands:
+const ssh_commands = `
+# Make key file read-only (required by SSH)
+chmod 400 your-key.pem
+
+# Connect to EC2
+ssh -i "your-key.pem" ec2-user@<your-ec2-public-ip>
+# For Ubuntu AMI:
+ssh -i "your-key.pem" ubuntu@<your-ec2-public-ip>
+`;
+
+/*
+STEP 3: SERVER SETUP (Install Dependencies)
+────────────────────────────────────────────
+*/
+
+const server_setup = `
+# ==========================================
+# UPDATE SYSTEM PACKAGES
+# ==========================================
+sudo apt update && sudo apt upgrade -y      # Ubuntu
+# OR
+sudo yum update -y                          # Amazon Linux
+
+# ==========================================
+# INSTALL NODE.js (using NVM - recommended)
+# ==========================================
+# Install NVM (Node Version Manager)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+# Reload shell
+source ~/.bashrc
+
+# Install latest LTS Node.js
+nvm install --lts
+
+# Verify
+node --version     # v20.x.x
+npm --version      # 10.x.x
+
+# ==========================================
+# INSTALL GIT
+# ==========================================
+sudo apt install git -y        # Ubuntu
+# OR
+sudo yum install git -y        # Amazon Linux
+
+# Verify
+git --version
+
+# ==========================================
+# INSTALL PM2 (Process Manager)
+# ==========================================
+npm install -g pm2
+
+# ==========================================
+# INSTALL NGINX (Reverse Proxy)
+# ==========================================
+sudo apt install nginx -y      # Ubuntu
+# OR
+sudo amazon-linux-extras install nginx1 -y  # Amazon Linux
+
+sudo systemctl start nginx
+sudo systemctl enable nginx     # Auto-start on boot
+`;
+
+/*
+STEP 4: DEPLOY APPLICATION CODE
+────────────────────────────────
+*/
+
+const deploy_code = `
+# ==========================================
+# CLONE YOUR REPOSITORY
+# ==========================================
+cd /home/ubuntu   # or /home/ec2-user
+git clone https://github.com/yourusername/blog-app.git
+cd blog-app
+
+# ==========================================
+# INSTALL DEPENDENCIES
+# ==========================================
+npm install --production       # Skip devDependencies
+
+# ==========================================
+# SETUP ENVIRONMENT VARIABLES
+# ==========================================
+nano .env
+# Add the following:
+# PORT=3000
+# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/blogapp
+# SESSION_SECRET=your_production_secret_here
+# NODE_ENV=production
+
+# Save: Ctrl+X → Y → Enter
+
+# ==========================================
+# TEST APPLICATION
+# ==========================================
+node app.js
+# Should see: Server running on port 3000
+# Press Ctrl+C to stop
+`;
+
+/*
+STEP 5: SETUP PM2 (Process Manager)
+────────────────────────────────────
+
+WHY PM2?
+- Keeps your app running even after SSH disconnect
+- Auto-restarts on crash
+- Built-in log management
+- Cluster mode for multi-core CPUs
+- Zero-downtime reloads
+*/
+
+const pm2_setup = `
+# ==========================================
+# START APPLICATION WITH PM2
+# ==========================================
+cd /home/ubuntu/blog-app
+
+# Start app
+pm2 start app.js --name "blog-app"
+
+# PM2 ESSENTIAL COMMANDS:
+pm2 list                    # Show all running apps
+pm2 logs blog-app           # View logs
+pm2 restart blog-app        # Restart app
+pm2 stop blog-app           # Stop app
+pm2 delete blog-app         # Remove from PM2
+pm2 monit                   # Real-time monitoring dashboard
+
+# ==========================================
+# AUTO-START PM2 ON SERVER REBOOT
+# ==========================================
+pm2 startup                 # Generates startup script
+# Run the command it outputs (copy-paste)
+pm2 save                    # Save current process list
+
+# ==========================================
+# PM2 WITH CLUSTER MODE (use all CPU cores)
+# ==========================================
+pm2 start app.js -i max --name "blog-app"
+# -i max = spawn one process per CPU core
+# -i 4   = spawn exactly 4 processes
+
+# ==========================================
+# ZERO-DOWNTIME RELOAD
+# ==========================================
+pm2 reload blog-app         # Gracefully reloads without dropping requests
+`;
+
+/*
+STEP 6: CONFIGURE NGINX (Reverse Proxy)
+────────────────────────────────────────
+
+WHY NGINX REVERSE PROXY?
+┌────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Without Nginx:                                            │
+│  Client → http://your-ip:3000                              │
+│  (Users must type port number, no SSL, no caching)         │
+│                                                             │
+│  With Nginx:                                               │
+│  Client → http://yourblog.com (port 80)                    │
+│       │                                                     │
+│       ▼                                                     │
+│  Nginx (port 80/443) → proxy_pass → Node.js (port 3000)   │
+│       │                                                     │
+│       ├── Handles SSL/HTTPS                                 │
+│       ├── Serves static files efficiently                   │
+│       ├── Gzip compression                                  │
+│       ├── Rate limiting                                     │
+│       ├── Load balancing (multiple Node instances)          │
+│       └── Security headers                                  │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+*/
+
+const nginx_config = `
+# ==========================================
+# CREATE NGINX CONFIG FILE
+# ==========================================
+sudo nano /etc/nginx/sites-available/blog-app
+
+# ==========================================
+# NGINX CONFIGURATION
+# ==========================================
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+    # OR use your EC2 public IP for testing:
+    # server_name your-ec2-public-ip;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Gzip compression
+    gzip on;
+    gzip_types text/css application/javascript application/json;
+    gzip_min_length 256;
+
+    # Serve static files directly through Nginx (faster)
+    location /css/ {
+        alias /home/ubuntu/blog-app/public/css/;
+        expires 30d;                    # Cache for 30 days
+        add_header Cache-Control "public, immutable";
+    }
+
+    location /js/ {
+        alias /home/ubuntu/blog-app/public/js/;
+        expires 30d;
+    }
+
+    location /images/ {
+        alias /home/ubuntu/blog-app/public/images/;
+        expires 30d;
+    }
+
+    # Proxy all other requests to Node.js
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Error pages
+    error_page 502 /502.html;
+    location = /502.html {
+        root /home/ubuntu/blog-app/public;
+    }
+}
+
+# ==========================================
+# ENABLE THE SITE
+# ==========================================
+# Create symlink
+sudo ln -s /etc/nginx/sites-available/blog-app /etc/nginx/sites-enabled/
+
+# Remove default site
+sudo rm /etc/nginx/sites-enabled/default
+
+# Test configuration
+sudo nginx -t
+# Should see: syntax is ok, test is successful
+
+# Restart Nginx
+sudo systemctl restart nginx
+`;
+
+/*
+STEP 7: SETUP SSL/HTTPS (Let's Encrypt - FREE)
+────────────────────────────────────────────────
+*/
+
+const ssl_setup = `
+# ==========================================
+# INSTALL CERTBOT (Let's Encrypt client)
+# ==========================================
+sudo apt install certbot python3-certbot-nginx -y
+
+# ==========================================
+# OBTAIN SSL CERTIFICATE
+# ==========================================
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Follow prompts:
+# 1. Enter email
+# 2. Agree to terms
+# 3. Choose redirect (option 2 - redirect HTTP to HTTPS)
+
+# Certificate auto-renews. Test renewal:
+sudo certbot renew --dry-run
+
+# ==========================================
+# VERIFY HTTPS
+# ==========================================
+# Visit: https://yourdomain.com
+# Should see green lock icon 🔒
+`;
+
+/*
+STEP 8: SETUP MONGODB ATLAS (Cloud Database)
+─────────────────────────────────────────────
+
+WHY ATLAS INSTEAD OF LOCAL MONGODB?
+- Managed service (no maintenance)
+- Automatic backups
+- Built-in monitoring
+- Free tier available (512MB)
+- Global clusters
+
+SETUP:
+1. Go to mongodb.com/atlas
+2. Create free cluster
+3. Create database user (username/password)
+4. Whitelist your EC2 IP (or 0.0.0.0/0 for all)
+5. Get connection string:
+   mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/blogapp
+
+6. Update .env on EC2:
+   MONGODB_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/blogapp
+
+
+========================================
+4.4 — DEPLOYMENT AUTOMATION SCRIPT
+========================================
+*/
+
+const deploy_script = `
+#!/bin/bash
+# deploy.sh - Run on EC2 to update application
+
+echo "📦 Pulling latest code..."
+cd /home/ubuntu/blog-app
+git pull origin main
+
+echo "📦 Installing dependencies..."
+npm install --production
+
+echo "🔄 Restarting application..."
+pm2 reload blog-app
+
+echo "✅ Deployment complete!"
+echo "🌐 App running at: https://yourdomain.com"
+
+# Usage: chmod +x deploy.sh && ./deploy.sh
+`;
+
+/*
+========================================
+4.5 — MONITORING & MAINTENANCE
+========================================
+
+┌──────────────────────────────────────────────────────────────┐
+│                  MONITORING TOOLS                             │
+├──────────────────┬───────────────────────────────────────────┤
+│ Tool             │ Purpose                                   │
+├──────────────────┼───────────────────────────────────────────┤
+│ PM2 Monit        │ Real-time CPU/Memory monitoring           │
+│ pm2 logs         │ Application logs                          │
+│ CloudWatch       │ AWS metrics (CPU, network, disk)          │
+│ MongoDB Atlas    │ Database metrics and alerts               │
+│ UptimeRobot      │ External uptime monitoring (free)         │
+│ Sentry           │ Error tracking and reporting              │
+└──────────────────┴───────────────────────────────────────────┘
+
+COMMON COMMANDS:
+  pm2 monit                 # Dashboard
+  pm2 logs --lines 100      # Last 100 log lines
+  sudo tail -f /var/log/nginx/error.log    # Nginx errors
+  df -h                     # Disk usage
+  free -m                   # Memory usage
+  top                       # CPU/process monitoring
+
+
+========================================
+4.6 — DEPLOYMENT CHECKLIST
+========================================
+
+┌──────────────────────────────────────────────────────────────┐
+│  PRODUCTION DEPLOYMENT CHECKLIST                              │
+│                                                               │
+│  PRE-DEPLOYMENT:                                              │
+│  ☑ Set NODE_ENV=production in .env                           │
+│  ☑ Use MongoDB Atlas (not local MongoDB)                     │
+│  ☑ Use strong SESSION_SECRET (random 64+ chars)              │
+│  ☑ Remove all console.log (use proper logging)               │
+│  ☑ Add error handling for all routes                         │
+│  ☑ Set secure: true on session cookies                       │
+│  ☑ Add rate limiting (express-rate-limit)                    │
+│  ☑ Add helmet.js for security headers                        │
+│                                                               │
+│  SERVER SETUP:                                                │
+│  ☑ Launch EC2 instance with security groups                  │
+│  ☑ Install Node.js, Git, PM2, Nginx                         │
+│  ☑ Clone repo and install dependencies                       │
+│  ☑ Configure PM2 (cluster mode, startup)                     │
+│  ☑ Configure Nginx reverse proxy                             │
+│  ☑ Setup SSL with Certbot                                    │
+│  ☑ Configure firewall (only 22, 80, 443 open)               │
+│                                                               │
+│  POST-DEPLOYMENT:                                             │
+│  ☑ Verify all routes work                                    │
+│  ☑ Test registration and login                               │
+│  ☑ Test blog CRUD operations                                 │
+│  ☑ Check SSL certificate                                     │
+│  ☑ Setup monitoring (PM2, CloudWatch)                        │
+│  ☑ Setup automatic certificate renewal                       │
+│  ☑ Test deployment script                                    │
+│  ☑ Setup daily database backups                              │
+└──────────────────────────────────────────────────────────────┘
+*/
+
+
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║                                                                          ║
+// ║   TOPIC 5: WEBSOCKETS IN NODEJS (SOCKET.IO)                              ║
+// ║                                                                          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+
+/*
+========================================
+5.1 — HTTP vs WEBSOCKETS
+========================================
+
+HTTP (Traditional):
+┌──────────┐                    ┌──────────┐
+│  CLIENT  │                    │  SERVER  │
+└────┬─────┘                    └────┬─────┘
+     │                               │
+     │  1. Request: GET /messages     │
+     │──────────────────────────────►│
+     │                               │
+     │  2. Response: [messages]       │
+     │◄──────────────────────────────│
+     │                               │
+     │  CONNECTION CLOSED ✘          │
+     │                               │
+     │  3. Any new messages?         │
+     │──────────────────────────────►│  (Must poll again!)
+     │                               │
+     │  4. Response: [no new]        │
+     │◄──────────────────────────────│
+     │                               │
+     │  CONNECTION CLOSED ✘          │
+     │                               │
+     │  (...repeat every few seconds)│
+     │                               │
+
+PROBLEMS:
+- Constant polling wastes bandwidth
+- Latency (messages delayed until next poll)
+- Server overhead (handling many requests)
+
+
+WEBSOCKET (Real-time):
+┌──────────┐                    ┌──────────┐
+│  CLIENT  │                    │  SERVER  │
+└────┬─────┘                    └────┬─────┘
+     │                               │
+     │  1. HTTP Upgrade Request       │
+     │──────────────────────────────►│
+     │                               │
+     │  2. 101 Switching Protocols   │
+     │◄──────────────────────────────│
+     │                               │
+     │  CONNECTION STAYS OPEN ✓      │
+     │  ═══════════════════════      │
+     │                               │
+     │  3. Client sends message      │
+     │──────────────────────────────►│
+     │                               │
+     │  4. Server pushes message     │
+     │◄──────────────────────────────│
+     │                               │
+     │  5. Server pushes another     │
+     │◄──────────────────────────────│
+     │                               │
+     │  6. Client sends message      │
+     │──────────────────────────────►│
+     │                               │
+     │  (Full duplex - both ways     │
+     │   simultaneously!)            │
+
+
+COMPARISON TABLE:
+┌──────────────────┬──────────────────┬──────────────────────┐
+│ Feature          │ HTTP             │ WebSocket            │
+├──────────────────┼──────────────────┼──────────────────────┤
+│ Connection       │ Short-lived      │ Persistent           │
+│ Direction        │ Unidirectional   │ Bidirectional        │
+│ Initiation       │ Client only      │ Client OR Server     │
+│ Overhead         │ Headers each req │ Minimal after handshk│
+│ Real-time        │ Polling (fake)   │ True real-time       │
+│ Protocol         │ HTTP/1.1, HTTP/2 │ ws:// or wss://      │
+│ Use Cases        │ REST APIs, pages │ Chat, gaming, live   │
+│                  │ static content   │ notifications, stocks│
+└──────────────────┴──────────────────┴──────────────────────┘
+
+
+========================================
+5.2 — WHAT IS SOCKET.IO?
+========================================
+
+Socket.IO = WebSocket library with superpowers
+
+┌─────────────────────────────────────────────────────────────┐
+│                    SOCKET.IO FEATURES                        │
+│                                                              │
+│  ✅ Automatic reconnection                                   │
+│  ✅ Fallback to HTTP long-polling (if WS not supported)     │
+│  ✅ Rooms and namespaces (group communication)              │
+│  ✅ Broadcasting (send to all/some clients)                 │
+│  ✅ Acknowledgements (message delivery confirmation)        │
+│  ✅ Binary streaming support                                │
+│  ✅ Works with Express, Koa, etc.                           │
+│  ✅ Client library auto-served                              │
+│                                                              │
+│  Socket.IO ≠ WebSocket                                       │
+│  Socket.IO USES WebSocket + adds features on top            │
+│  Socket.IO client can only connect to Socket.IO server      │
+└─────────────────────────────────────────────────────────────┘
+
+
+========================================
+5.3 — INSTALLATION
+========================================
+
+npm install socket.io                 # Server-side
+npm install socket.io-client          # Client-side (optional, auto-served)
+
+
+========================================
+5.4 — SERVER SETUP
+========================================
+*/
+
+const socketio_server_code = `
+// ==========================================
+// BASIC SOCKET.IO SERVER
+// ==========================================
+const express = require('express');
+const http    = require('http');
+const { Server } = require('socket.io');
+const path    = require('path');
+
+const app    = express();
+const server = http.createServer(app);  // Create HTTP server from Express
+const io     = new Server(server);       // Attach Socket.IO to HTTP server
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve main page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ==========================================
+// SOCKET.IO CONNECTION HANDLING
+// ==========================================
+/*
+  Event Lifecycle:
+  1. Client connects      → 'connection' event fires on server
+  2. Client sends message  → Custom event fires
+  3. Server broadcasts     → All clients receive
+  4. Client disconnects    → 'disconnect' event fires
+*/
+
+io.on('connection', (socket) => {
+    console.log('✅ User connected:', socket.id);
+
+    // ---- RECEIVE message from client ----
+    socket.on('chat message', (data) => {
+        console.log('Message received:', data);
+
+        // Broadcast to ALL connected clients 

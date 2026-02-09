@@ -5780,3 +5780,702 @@ COMMON EVENTS:
 // - Small files (< 1MB)
 // - Simple one-time reads
 // - When you need all data at once
+
+
+
+//============================================
+// 📚 WHAT IS NGINX?
+//============================================
+// NGINX = High-performance web server, reverse proxy, load balancer
+// Pronounced: "Engine-X"
+// Uses: Web server, API Gateway, Load Balancer, Cache Server
+
+// Key Features:
+// ✅ Fast & lightweight
+// ✅ Handles 10,000+ concurrent connections
+// ✅ Low memory usage
+// ✅ Reverse proxy & load balancing
+// ✅ Static file serving
+// ✅ SSL/TLS termination
+
+
+//============================================
+// 🎯 WHY USE NGINX?
+//============================================
+/*
+1. Web Server - Serve static files (HTML, CSS, JS, images)
+2. Reverse Proxy - Forward requests to backend servers
+3. Load Balancer - Distribute traffic across multiple servers
+4. Caching - Store responses to reduce backend load
+5. SSL/TLS - Handle HTTPS encryption
+6. API Gateway - Route API requests
+*/
+
+
+//============================================
+// 📁 NGINX FILE STRUCTURE
+//============================================
+/*
+/etc/nginx/
+├── nginx.conf              # Main config file
+├── sites-available/        # Available site configs
+├── sites-enabled/          # Enabled site configs (symlinks)
+├── conf.d/                 # Additional configs
+├── snippets/               # Reusable config snippets
+└── modules-enabled/        # Enabled modules
+
+/var/log/nginx/
+├── access.log             # Request logs
+└── error.log              # Error logs
+
+/usr/share/nginx/html/     # Default web root
+└── index.html
+*/
+
+
+//============================================
+// ⚙️ BASIC CONFIGURATION
+//============================================
+
+# /etc/nginx/nginx.conf
+# Main configuration file
+
+user www-data;                    # User to run nginx
+worker_processes auto;            # Number of worker processes (auto = CPU cores)
+pid /run/nginx.pid;              # Process ID file
+
+events {
+    worker_connections 1024;      # Max connections per worker (1024 * cores)
+    use epoll;                    # Efficient connection processing
+}
+
+http {
+    # Basic Settings
+    sendfile on;                  # Efficient file transfer
+    tcp_nopush on;               # Optimize packet sending
+    tcp_nodelay on;              # Don't buffer data
+    keepalive_timeout 65;        # Keep connections alive for 65s
+    types_hash_max_size 2048;    # Max size of types hash table
+    
+    # MIME Types
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Logging
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    
+    # Gzip Compression
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css application/json application/javascript;
+    
+    # Include other configs
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+
+
+//============================================
+// 🌐 BASIC WEB SERVER
+//============================================
+
+# /etc/nginx/sites-available/my-site
+# Simple static website
+
+server {
+    listen 80;                           # Listen on port 80
+    listen [::]:80;                      # IPv6
+    server_name example.com www.example.com;
+    
+    root /var/www/html;                  # Document root
+    index index.html index.htm;          # Default files
+    
+    # Serve static files
+    location / {
+        try_files $uri $uri/ =404;       # Try file, then directory, then 404
+    }
+    
+    # Custom error pages
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+    
+    # Logging
+    access_log /var/log/nginx/example.access.log;
+    error_log /var/log/nginx/example.error.log;
+}
+
+
+//============================================
+// 🔄 REVERSE PROXY (Node.js, Python, etc.)
+//============================================
+
+# Proxy requests to backend server (Node.js on port 3000)
+
+server {
+    listen 80;
+    server_name api.example.com;
+    
+    location / {
+        proxy_pass http://localhost:3000;           # Backend server
+        
+        # Proxy headers
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # Buffering
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# Multiple backend servers
+upstream backend {
+    server localhost:3000;
+    server localhost:3001;
+    server localhost:3002;
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
+
+
+//============================================
+// ⚖️ LOAD BALANCING
+//============================================
+
+# 1️⃣ ROUND ROBIN (default)
+upstream backend {
+    server 192.168.1.10:3000;
+    server 192.168.1.11:3000;
+    server 192.168.1.12:3000;
+}
+
+# 2️⃣ LEAST CONNECTIONS
+upstream backend {
+    least_conn;
+    server 192.168.1.10:3000;
+    server 192.168.1.11:3000;
+}
+
+# 3️⃣ IP HASH (same client → same server)
+upstream backend {
+    ip_hash;
+    server 192.168.1.10:3000;
+    server 192.168.1.11:3000;
+}
+
+# 4️⃣ WEIGHTED LOAD BALANCING
+upstream backend {
+    server 192.168.1.10:3000 weight=3;  # Gets 3x more requests
+    server 192.168.1.11:3000 weight=1;
+}
+
+# 5️⃣ HEALTH CHECKS
+upstream backend {
+    server 192.168.1.10:3000 max_fails=3 fail_timeout=30s;
+    server 192.168.1.11:3000 backup;    # Only used if others fail
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
+
+
+//============================================
+// 🔒 SSL/TLS (HTTPS)
+//============================================
+
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    server_name example.com;
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+    
+    # SSL Certificates
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/key.pem;
+    
+    # SSL Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # Security Headers
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+}
+
+# Let's Encrypt (Free SSL)
+# Install: certbot --nginx -d example.com
+
+
+//============================================
+// 💾 CACHING
+//============================================
+
+# Cache configuration
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m 
+                 max_size=1g inactive=60m use_temp_path=off;
+
+server {
+    listen 80;
+    server_name example.com;
+    
+    location / {
+        proxy_cache my_cache;
+        proxy_cache_valid 200 60m;           # Cache 200 responses for 60min
+        proxy_cache_valid 404 1m;            # Cache 404 for 1min
+        proxy_cache_use_stale error timeout updating;
+        proxy_cache_bypass $http_cache_control;
+        
+        add_header X-Cache-Status $upstream_cache_status;
+        
+        proxy_pass http://backend;
+    }
+    
+    # Don't cache these
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+
+
+//============================================
+// 📂 STATIC FILE SERVING
+//============================================
+
+server {
+    listen 80;
+    server_name static.example.com;
+    root /var/www/static;
+    
+    # Serve static files efficiently
+    location / {
+        try_files $uri $uri/ =404;
+    }
+    
+    # Cache images
+    location ~* \.(jpg|jpeg|png|gif|ico|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Cache CSS/JS
+    location ~* \.(css|js)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+    
+    # Prevent access to hidden files
+    location ~ /\. {
+        deny all;
+    }
+    
+    # Enable gzip
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript;
+    gzip_min_length 1000;
+}
+
+
+//============================================
+// 🛣️ LOCATION BLOCKS (ROUTING)
+//============================================
+
+server {
+    listen 80;
+    
+    # Exact match
+    location = / {
+        return 200 "Exact root match\n";
+    }
+    
+    # Prefix match
+    location /api/ {
+        proxy_pass http://localhost:3000;
+    }
+    
+    # Regex match (case-sensitive)
+    location ~ \.(jpg|png)$ {
+        root /var/www/images;
+    }
+    
+    # Regex match (case-insensitive)
+    location ~* \.(jpg|png|gif)$ {
+        root /var/www/images;
+    }
+    
+    # Prefix match (stop searching)
+    location ^~ /static/ {
+        root /var/www;
+    }
+    
+    # Default fallback
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+# Priority: = > ^~ > ~ > ~* > prefix
+
+
+//============================================
+// 🔐 SECURITY & ACCESS CONTROL
+//============================================
+
+# IP-based access control
+server {
+    listen 80;
+    
+    location /admin {
+        allow 192.168.1.0/24;      # Allow this network
+        allow 10.0.0.1;            # Allow this IP
+        deny all;                  # Deny everyone else
+        
+        proxy_pass http://localhost:3000;
+    }
+}
+
+# Basic authentication
+server {
+    listen 80;
+    
+    location /private {
+        auth_basic "Restricted Area";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        
+        root /var/www/private;
+    }
+}
+
+# Create password file:
+# htpasswd -c /etc/nginx/.htpasswd username
+
+# Rate limiting
+http {
+    limit_req_zone $binary_remote_addr zone=mylimit:10m rate=10r/s;
+    
+    server {
+        location /api {
+            limit_req zone=mylimit burst=20 nodelay;
+            proxy_pass http://backend;
+        }
+    }
+}
+
+# Security headers
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-XSS-Protection "1; mode=block" always;
+add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+
+//============================================
+// 🌍 REAL-WORLD EXAMPLES
+//============================================
+
+# 1️⃣ REACT/ANGULAR SPA
+server {
+    listen 80;
+    server_name app.example.com;
+    root /var/www/app/build;
+    index index.html;
+    
+    location / {
+        try_files $uri $uri/ /index.html;  # Fallback to index.html
+    }
+    
+    location /api {
+        proxy_pass http://localhost:3000;
+    }
+}
+
+# 2️⃣ WORDPRESS
+server {
+    listen 80;
+    server_name blog.example.com;
+    root /var/www/wordpress;
+    index index.php;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+    
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+
+# 3️⃣ WEBSOCKET PROXY
+server {
+    listen 80;
+    
+    location /ws {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+
+# 4️⃣ MICROSERVICES API GATEWAY
+upstream auth_service {
+    server localhost:3001;
+}
+upstream user_service {
+    server localhost:3002;
+}
+upstream order_service {
+    server localhost:3003;
+}
+
+server {
+    listen 80;
+    server_name api.example.com;
+    
+    location /auth {
+        proxy_pass http://auth_service;
+    }
+    
+    location /users {
+        proxy_pass http://user_service;
+    }
+    
+    location /orders {
+        proxy_pass http://order_service;
+    }
+}
+
+# 5️⃣ CDN / STATIC ASSET SERVER
+server {
+    listen 80;
+    server_name cdn.example.com;
+    root /var/www/cdn;
+    
+    # Aggressive caching
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # Enable CORS
+    add_header Access-Control-Allow-Origin *;
+}
+
+
+//============================================
+// 🛠️ USEFUL NGINX VARIABLES
+//============================================
+/*
+$uri                    # Current URI (e.g., /path/file.html)
+$request_uri            # Full original request URI with args
+$host                   # Host header from request
+$remote_addr            # Client IP address
+$server_name            # Server name
+$scheme                 # http or https
+$request_method         # GET, POST, etc.
+$args                   # Query string
+$http_user_agent        # User agent
+$http_referer           # Referrer
+$status                 # Response status code
+$body_bytes_sent        # Bytes sent to client
+*/
+
+
+//============================================
+// 📝 COMMON NGINX COMMANDS
+//============================================
+/*
+# Test configuration
+sudo nginx -t
+
+# Reload configuration (no downtime)
+sudo nginx -s reload
+
+# Start NGINX
+sudo systemctl start nginx
+
+# Stop NGINX
+sudo systemctl stop nginx
+
+# Restart NGINX
+sudo systemctl restart nginx
+
+# Enable on boot
+sudo systemctl enable nginx
+
+# Check status
+sudo systemctl status nginx
+
+# View logs
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+
+# Edit main config
+sudo nano /etc/nginx/nginx.conf
+
+# Edit site config
+sudo nano /etc/nginx/sites-available/default
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/mysite /etc/nginx/sites-enabled/
+
+# Disable site
+sudo rm /etc/nginx/sites-enabled/mysite
+*/
+
+
+//============================================
+// ⚡ PERFORMANCE TUNING
+//============================================
+
+# nginx.conf optimizations
+worker_processes auto;                    # Use all CPU cores
+worker_rlimit_nofile 65535;              # Max open files
+
+events {
+    worker_connections 4096;              # More connections
+    use epoll;                            # Efficient on Linux
+    multi_accept on;                      # Accept multiple connections
+}
+
+http {
+    # Buffers
+    client_body_buffer_size 128k;
+    client_max_body_size 10m;
+    client_header_buffer_size 1k;
+    large_client_header_buffers 4 16k;
+    
+    # Timeouts
+    client_body_timeout 12;
+    client_header_timeout 12;
+    keepalive_timeout 15;
+    send_timeout 10;
+    
+    # File handling
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    
+    # Compression
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_min_length 1000;
+    gzip_proxied any;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+    
+    # Caching
+    open_file_cache max=1000 inactive=20s;
+    open_file_cache_valid 30s;
+    open_file_cache_min_uses 2;
+    open_file_cache_errors on;
+}
+
+
+//============================================
+// 🐛 DEBUGGING & TROUBLESHOOTING
+//============================================
+
+# Enable debug logging
+error_log /var/log/nginx/error.log debug;
+
+# Log request details
+log_format detailed '$remote_addr - $remote_user [$time_local] '
+                   '"$request" $status $body_bytes_sent '
+                   '"$http_referer" "$http_user_agent" '
+                   'rt=$request_time uct="$upstream_connect_time"';
+
+access_log /var/log/nginx/access.log detailed;
+
+# Return custom responses (testing)
+location /test {
+    return 200 "Hello from NGINX\n";
+    add_header Content-Type text/plain;
+}
+
+
+//============================================
+// ✅ BEST PRACTICES
+//============================================
+/*
+1. Always test config before reload: nginx -t
+2. Use separate files for each site in sites-available/
+3. Keep SSL certificates secure (600 permissions)
+4. Enable gzip compression
+5. Use caching for static content
+6. Implement rate limiting for APIs
+7. Add security headers
+8. Use HTTPS everywhere
+9. Monitor logs regularly
+10. Set appropriate timeouts
+11. Use upstream blocks for backends
+12. Enable HTTP/2 for performance
+*/
+
+
+//============================================
+// 📋 QUICK REFERENCE CHEAT SHEET
+//============================================
+/*
+NGINX ROLES:
+├─ Web Server        → Serve static files
+├─ Reverse Proxy     → Forward to backend
+├─ Load Balancer     → Distribute traffic
+├─ Cache Server      → Store responses
+├─ SSL Termination   → Handle HTTPS
+└─ API Gateway       → Route API requests
+
+COMMON DIRECTIVES:
+├─ server {}         → Virtual host
+├─ location {}       → URL routing
+├─ proxy_pass        → Forward requests
+├─ root              → Document root
+├─ try_files         → File lookup
+├─ return            → Return response
+├─ rewrite           → URL rewriting
+└─ upstream {}       → Backend servers
+
+LOAD BALANCING:
+├─ round_robin       → Default (equal distribution)
+├─ least_conn        → Least connections
+├─ ip_hash           → Client IP sticky
+└─ weight            → Weighted distribution
+*/

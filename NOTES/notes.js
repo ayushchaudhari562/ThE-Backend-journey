@@ -5446,7 +5446,7 @@ app.get('/', (req, res) => {
   3. Server broadcasts     → All clients receive
   4. Client disconnects    → 'disconnect' event fires
 */
-
+/*
 io.on('connection', (socket) => {
     console.log('✅ User connected:', socket.id);
 
@@ -5454,4 +5454,329 @@ io.on('connection', (socket) => {
     socket.on('chat message', (data) => {
         console.log('Message received:', data);
 
-        // Broadcast to ALL connected clients 
+        // Broadcast to ALL connected clients */
+
+
+
+        
+        Stream 
+
+// Streams = Handle data piece by piece (chunks)
+// Instead of loading everything into memory at once
+
+// ❌ WITHOUT STREAMS (loads entire file)
+const data = fs.readFileSync('large-file.txt'); // 1GB in memory!
+
+// ✅ WITH STREAMS (processes in chunks)
+const stream = fs.createReadStream('large-file.txt'); // 64KB at a time
+stream.on('data', chunk => console.log(chunk));
+
+
+//============================================
+// 🎯 WHY USE STREAMS?
+//============================================
+// 1. Memory Efficient - Don't load everything at once
+// 2. Time Efficient - Start processing immediately
+// 3. Composable - Chain operations together
+// 4. Handle large files (videos, logs, databases)
+
+
+//============================================
+// 📖 1. READABLE STREAMS (Read FROM)
+//============================================
+const fs = require('fs');
+
+// Basic readable stream
+const readable = fs.createReadStream('input.txt');
+
+/*readable.on('data', chunk => {
+  console.log(`Got ${chunk.length} bytes`);
+});
+
+readable.on('end', () => {
+  console.log('Done reading');
+});
+
+readable.on('error', err => {
+  console.error('Error:', err);
+});
+
+// Common readable streams:
+// - fs.createReadStream()
+// - http.IncomingMessage (req)
+// - process.stdin
+
+
+//============================================
+// ✍️ 2. WRITABLE STREAMS (Write TO)
+//============================================
+
+// Basic writable stream
+const writable = fs.createWriteStream('output.txt');
+
+writable.write('Hello ');
+writable.write('World!\n');
+writable.end('Goodbye!'); // Write and close
+
+writable.on('finish', () => {
+  console.log('All writes done');
+});
+
+// Common writable streams:
+// - fs.createWriteStream()
+// - http.ServerResponse (res)
+// - process.stdout
+
+
+//============================================
+// 🔄 3. DUPLEX STREAMS (Read AND Write)
+//============================================
+const { Duplex } = require('stream');
+
+const duplex = new Duplex({
+  read(size) {
+    this.push('reading data');
+    this.push(null); // End
+  },
+  write(chunk, encoding, callback) {
+    console.log('writing:', chunk.toString());
+    callback();
+  }
+});
+
+// Can both read and write
+// Examples: net.Socket, TCP connections
+
+
+//============================================
+// 🔀 4. TRANSFORM STREAMS (Modify data)
+//============================================
+const { Transform } = require('stream');
+
+// Convert to uppercase
+const upperCase = new Transform({
+  transform(chunk, encoding, callback) {
+    this.push(chunk.toString().toUpperCase());
+    callback();
+  }
+});
+
+// Usage
+process.stdin.pipe(upperCase).pipe(process.stdout);
+
+// Common transforms:
+// - zlib.createGzip() (compression)
+// - crypto.createCipher() (encryption)
+
+
+//============================================
+// 🔗 PIPING STREAMS
+//============================================
+
+// Simple pipe (copy file)
+fs.createReadStream('input.txt')
+  .pipe(fs.createWriteStream('output.txt'));
+
+// Chain multiple pipes
+fs.createReadStream('file.txt')
+  .pipe(zlib.createGzip())              // Compress
+  .pipe(fs.createWriteStream('file.gz')); // Write
+
+// Pipe with error handling
+const { pipeline } = require('stream');
+
+pipeline(
+  fs.createReadStream('source.txt'),
+  transform,
+  fs.createWriteStream('dest.txt'),
+  (err) => {
+    if (err) console.error('Failed:', err);
+    else console.log('Success!');
+  }
+);
+
+
+//============================================
+// 📊 COMMON STREAM EVENTS
+//============================================
+
+// Readable events
+readable.on('data', chunk => {});    // Data available
+readable.on('end', () => {});        // No more data
+readable.on('error', err => {});     // Error occurred
+readable.on('close', () => {});      // Stream closed
+
+// Writable events
+writable.on('drain', () => {});      // Ready for more data
+writable.on('finish', () => {});     // All data written
+writable.on('error', err => {});     // Error occurred
+
+
+//============================================
+// 💡 REAL-WORLD EXAMPLES
+//============================================
+
+// 1️⃣ FILE UPLOAD
+app.post('/upload', (req, res) => {
+  req.pipe(fs.createWriteStream('upload.txt'))
+    .on('finish', () => res.send('Done!'))
+    .on('error', err => res.status(500).send('Failed'));
+});
+
+// 2️⃣ VIDEO STREAMING
+app.get('/video', (req, res) => {
+  const stream = fs.createReadStream('video.mp4');
+  stream.pipe(res);
+});
+
+// 3️⃣ GZIP COMPRESSION
+fs.createReadStream('input.txt')
+  .pipe(zlib.createGzip())
+  .pipe(fs.createWriteStream('input.txt.gz'));
+
+// 4️⃣ CSV PROCESSING
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: fs.createReadStream('data.csv')
+});
+
+rl.on('line', line => {
+  console.log('Row:', line);
+});
+
+// 5️⃣ HTTP RESPONSE STREAMING
+http.createServer((req, res) => {
+  fs.createReadStream('large.json').pipe(res);
+}).listen(3000);
+
+// 6️⃣ LOG FILE ANALYSIS
+fs.createReadStream('access.log')
+  .pipe(filterErrors)
+  .pipe(process.stdout);
+
+
+//============================================
+// 🛠️ CUSTOM STREAMS
+//============================================
+
+// Custom Readable
+class Counter extends Readable {
+  constructor() {
+    super();
+    this.count = 0;
+  }
+  _read() {
+    if (this.count++ < 5) {
+      this.push(`${this.count}\n`);
+    } else {
+      this.push(null); // End
+    }
+  }
+}
+
+// Custom Writable
+class Logger extends Writable {
+  _write(chunk, encoding, callback) {
+    console.log('LOG:', chunk.toString());
+    callback();
+  }
+}
+
+// Custom Transform
+class Reverse extends Transform {
+  _transform(chunk, encoding, callback) {
+    const reversed = chunk.toString().split('').reverse().join('');
+    this.push(reversed);
+    callback();
+  }
+}
+
+
+//============================================
+// ⚡ BUFFERING VS STREAMING
+//============================================
+
+// ❌ BUFFERING (bad for large files)
+fs.readFile('1gb-file.txt', (err, data) => {
+  // Loads 1GB into memory!
+});
+
+// ✅ STREAMING (memory efficient)
+const stream = fs.createReadStream('1gb-file.txt', {
+  highWaterMark: 64 * 1024 // 64KB chunks
+});
+stream.on('data', chunk => {
+  // Only 64KB in memory at a time
+});
+
+
+//============================================
+// ✅ BEST PRACTICES
+//============================================
+
+// 1. Always handle errors
+stream.on('error', err => console.error(err));
+
+// 2. Use pipeline() for multiple streams
+pipeline(source, transform, dest, callback);
+
+// 3. Handle backpressure
+if (!writable.write(chunk)) {
+  readable.pause();
+  writable.once('drain', () => readable.resume());
+}
+
+// 4. Set chunk size appropriately
+const stream = fs.createReadStream('file.txt', {
+  highWaterMark: 16 * 1024 // 16KB
+});
+
+// 5. Clean up on errors
+stream.on('error', () => stream.destroy());
+
+
+//============================================
+// 📋 QUICK REFERENCE
+//============================================
+
+/*
+STREAM TYPES:
+├─ Readable   → Read from (fs.createReadStream)
+├─ Writable   → Write to (fs.createWriteStream)
+├─ Duplex     → Both (net.Socket)
+└─ Transform  → Modify (zlib.createGzip)
+
+COMMON METHODS:
+├─ .pipe(dest)
+├─ .read()
+├─ .write(chunk)
+├─ .end()
+├─ .pause()
+├─ .resume()
+└─ .destroy()
+
+COMMON EVENTS:
+├─ 'data'
+├─ 'end'
+├─ 'error'
+├─ 'finish'
+├─ 'drain'
+└─ 'close'
+*/
+
+
+//============================================
+// 🎯 WHEN TO USE STREAMS?
+//============================================
+
+// ✅ USE STREAMS FOR:
+// - Large files (videos, logs, databases)
+// - Real-time data (chat, live feeds)
+// - File uploads/downloads
+// - Data transformation (compression, encryption)
+// - Memory-constrained environments
+
+// ❌ DON'T USE STREAMS FOR:
+// - Small files (< 1MB)
+// - Simple one-time reads
+// - When you need all data at once

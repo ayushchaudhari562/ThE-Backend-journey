@@ -5398,21 +5398,7 @@ COMPARISON TABLE:
 
 Socket.IO = WebSocket library with superpowers
 
-┌─────────────────────────────────────────────────────────────┐
-│                    SOCKET.IO FEATURES                        │
-│                                                              │
-│  ✅ Automatic reconnection                                   │
-│  ✅ Fallback to HTTP long-polling (if WS not supported)     │
-│  ✅ Rooms and namespaces (group communication)              │
-│  ✅ Broadcasting (send to all/some clients)                 │
-│  ✅ Acknowledgements (message delivery confirmation)        │
-│  ✅ Binary streaming support                                │
-│  ✅ Works with Express, Koa, etc.                           │
-│  ✅ Client library auto-served                              │
-│                                                              │
-│  Socket.IO ≠ WebSocket                                       │
-│  Socket.IO USES WebSocket + adds features on top            │
-│  Socket.IO client can only connect to Socket.IO server      │
+
 └─────────────────────────────────────────────────────────────┘
 
 

@@ -3899,11 +3899,7 @@ const login_ejs = `
 // ║                                                                          ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
-/*
-========================================
-3.1 — BLOG MODEL (models/Blog.js)
-========================================
-*/
+// blog model from here
 
 const blog_model_code = `
 const mongoose = require('mongoose');
